@@ -1,66 +1,101 @@
 # D2D — Design2Deploy
 
-> **设计驱动的AI开发体系。从设计到部署，诊断先行。**
+> **Design-driven AI development pipeline. From design to deploy, diagnose first.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-D2D 是一个由 7 步状态机驱动的设计 → 部署管线。收到设计稿后，它扮演资深全栈架构师的角色，在写任何代码之前先做诊断对齐，最终交付可部署的完整应用。核心原则：**拒绝盲目编码，诊断先行。**
+D2D is a 7-step workflow that transforms design files into deployed applications.
+It acts as a senior full-stack architect — diagnosing, aligning, and planning
+before writing a single line of code.
 
-## 安装
+**Core principle:** *Diagnose before you build. No blind coding.*
 
-> **前提**：解析 Figma 设计稿需要 [Personal Access Token](https://www.figma.com/developers/api#access-tokens)。没有也能用——自动回退到截图分析模式。
+Five operation modes for every stage of a project's lifecycle:
 
-### Claude Desktop（推荐）
+| Mode | Trigger | When to use |
+|------|---------|-------------|
+| **Greenfield** (from scratch) | `/d2d <design>` + empty directory | New project, full 7 steps |
+| **Brownfield** (existing project) | `/d2d <design>` + existing project | Add a new design to an existing codebase |
+| **Update** (design iteration) | `/d2d update [new-link]` | The same design evolved — incremental diff |
+| **Restart** (full reset) | `/d2d restart [new-link]` | Throw away generated code, start over |
+| **Sync** (feed back to Figma) | `/d2d sync` | Push CSS variables and style changes back to Figma |
 
-将 [SKILL.md](./SKILL.md) 保存为技能，之后随时触发：
+The first two modes auto-detect; Update, Restart, and Sync are explicit commands.
+
+## Installation
+
+### As a Claude Skill
+
+1. Go to the [D2D GitHub repository](https://github.com/brickhu/d2d)
+2. Copy the contents of [SKILL.md](https://raw.githubusercontent.com/brickhu/d2d/main/SKILL.md)
+3. Save it as a skill (use `/save-skill` in Claude Desktop or the skill management UI)
+
+Once installed:
 
 ```
-/d2d  https://www.figma.com/design/xxx/MyDesign
-/d2d  [上传截图]
+/d2d https://www.figma.com/design/xxx/MyDesign
+/d2d [upload screenshot]
 ```
 
-### Claude Code / Cursor / Windsurf
+### As a System Prompt (Claude Code, Cursor, Windsurf, any Agent)
 
-复制 SKILL.md 内容到 `CLAUDE.md` / `.cursorrules` / `.windsurfrules`。
+Copy the contents of `SKILL.md` into:
+- `CLAUDE.md` (Claude Code)
+- `.cursorrules` (Cursor)
+- `.windsurfrules` (Windsurf)
+- Or directly into your agent's system prompt
 
-### 其他 Agent
+Any agent with multimodal vision and tool-calling support can run D2D.
 
-支持多模态视觉 + 工具调用的 Agent 均可将 SKILL.md 作为系统提示词注入。
-
-## 工作流
+## How It Works
 
 ```
-Step 1 🔍 DIAGNOSIS    —— 扫描设计稿，输出视觉诊断报告，用户确认
-Step 2 🎨 TOKENS       —— 提取 Design Tokens → .d2d/DESIGN.md
-Step 3 🏗️ ARCHITECTURE —— 逐个问答确定技术栈/数据库/部署/CI/CD → .d2d/AGENT.md
-Step 4 📐 SPEC         —— 目录结构 + 组件树 + 编码约束 → .d2d/SPEC.md
-Step 5 ⚡ INIT          —— 脚手架 ＋ 原子化任务列表 PLAN.md
-Step 6 💻 CODE          —— 按 PLAN.md 逐步编码，每步确认
-Step 7 🚀 DEPLOY        —— CI/CD 配置 + 构建验证 + 部署指引
+Step 1 🔍 DIAGNOSIS    —— Scan design + detect project mode → diagnostic report
+Step 2 🎨 TOKENS       —— Extract Design Tokens → .d2d/DESIGN.md (includes design URL)
+Step 3 🏗️ ARCHITECTURE —— Tech stack Q&A (Brownfield reads existing project first) → .d2d/AGENTS.md
+Step 4 📐 SPEC         —— Directory structure + component tree + coding constraints → .d2d/SPEC.md
+Step 5 ⚡ INIT          —— Scaffold (Greenfield only) + asset download + PLAN.md
+Step 6 💻 CODE          —— Implement per PLAN.md, step-by-step with confirmation
+Step 7 🚀 DEPLOY        —— CI/CD config + build verification + README
 ```
 
-- 每步完成后等待用户确认，支持中断恢复（`.d2d/STATE.md`)
-- Step 1 自动校验设计稿类型，只支持 **Web / iOS / Android / 桌面应用**，非应用设计明确拒绝
-- 因果引导式交互："由于项目需要实时数据，建议 WebSocket，你觉得呢？"
+- Each step waits for user confirmation before proceeding
+- Step 1 validates the design type — only **Web, iOS, Android, Desktop** are
+  accepted. Posters, logos, illustrations, and print layouts are rejected
+  with a clear explanation
+- DESIGN.md records the source design URL for post-D2D traceability
+- All documents auto-detect the user's language (English, Chinese, Japanese,
+  etc.) — technical identifiers stay in English
 
-## 产物
+## Data Access Priority
 
-| 文件 | 内容 |
-|------|------|
-| `.d2d/DESIGN.md` | 设计 Token（颜色、字体、间距、阴影） |
-| `.d2d/AGENT.md` | 技术栈决策与 ADR |
-| `.d2d/SPEC.md` | 组件树、目录结构、编码约束 |
-| `PLAN.md` | 原子化开发任务列表 |
+D2D fetches design data through three tiers, starting with the most convenient:
 
-## 兼容 Agent
+```
+1️⃣ Figma MCP (preferred) — zero-config if the Figma plugin is installed
+2️⃣ Figma REST API (fallback) — requires a Personal Access Token
+3️⃣ Multimodal vision (last resort) — screenshot analysis, no credentials
+```
 
-| Agent | 方式 |
-|-------|------|
-| Claude Desktop | ✅ 原生技能，`/d2d` 触发 |
+## Generated Artifacts
+
+| File | Contents |
+|------|----------|
+| `.d2d/DESIGN.md` | Design tokens + design URL (colors, typography, spacing, shadows) |
+| `.d2d/AGENTS.md` | Tech stack decisions & ADRs |
+| `.d2d/SPEC.md` | Component tree, directory structure, coding constraints |
+| `.d2d/ASSETS.md` | Image & animation asset manifest with local paths |
+| `PLAN.md` | Atomic development task list |
+
+## Agent Compatibility
+
+| Agent | Method |
+|-------|--------|
+| Claude Desktop | ✅ Native skill, `/d2d` trigger |
 | Claude Code | ✅ `CLAUDE.md` |
 | Cursor | ✅ `.cursorrules` |
 | Windsurf | ✅ `.windsurfrules` |
-| 任何 MCP 兼容 Agent | ✅ 封装为 MCP 工具或系统提示词 |
+| Any MCP-compatible agent | ✅ System prompt or MCP tool |
 
 ## License
 
