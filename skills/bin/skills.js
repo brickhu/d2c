@@ -276,7 +276,7 @@ function showHelp() {
 
   Usage:
     npx skills add <npm-package>          Install from npm registry
-      Example:  npx skills add d2c
+      Example:  npx skills add design2context
       
     npx skills add <github-repo-url>      Install from GitHub
       Example:  npx skills add https://github.com/brickhu/d2c

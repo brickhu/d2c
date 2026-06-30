@@ -2,7 +2,7 @@
 
 > Install AI coding skills with one command.
 >
-> `npx skills add d2c`
+> `npx skills add design2context`
 >
 > `npx skills add https://github.com/brickhu/d2c`
 
@@ -10,7 +10,7 @@
 
 ```bash
 # Install from npm registry
-npx skills add d2c
+npx skills add design2context
 
 # Install from GitHub
 npx skills add https://github.com/brickhu/d2c

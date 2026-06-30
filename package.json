@@ -1,5 +1,5 @@
 {
-  "name": "d2c",
+  "name": "design2context",
   "version": "0.1.0",
   "description": "Design2Context — AI skill that translates design files into structured full-stack AI development context consumed by Code Agents",
   "dependencies": {

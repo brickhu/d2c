@@ -2,7 +2,7 @@
 
 > Translate design files into structured full-stack AI development context.
 
-[![npm version](https://img.shields.io/npm/v/d2c)](https://www.npmjs.com/package/d2c)
+[![npm version](https://img.shields.io/npm/v/design2context)](https://www.npmjs.com/package/design2context)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 <p align="center">
@@ -35,7 +35,7 @@ D2C is distributed as an AI skill package on npm. Install it with the `skills` C
 
 ```bash
 # Option 1: Install from npm registry (recommended)
-npx skills add d2c
+npx skills add design2context
 
 # Option 2: Install from GitHub
 npx skills add https://github.com/brickhu/d2c
@@ -69,7 +69,7 @@ The `skills` CLI automatically detects your AI coding tool environment and place
 
 ```bash
 # 1. Install D2C
-npx skills add d2c
+npx skills add design2context
 
 # 2. Go to your project directory
 cd my-project
@@ -170,7 +170,7 @@ Here's what a complete D2C session looks like from start to finish:
 
 ```bash
 # ── 1. Install ──
-npx skills add d2c
+npx skills add design2context
 
 # ── 2. Start a project ──
 cd ~/Projects/dashboard-app
@@ -209,7 +209,7 @@ D2C's output context files follow standard conventions recognized by all major A
 - **Windsurf** — auto-loads `AGENTS.md`
 - **TRAE IDE / CLI** — loads via installed skill
 
-No additional configuration is needed. After `npx skills add d2c`, the context files are placed where your AI tool already looks.
+No additional configuration is needed. After \`npx skills add design2context\`, the context files are placed where your AI tool already looks.
 
 ---
 
@@ -230,7 +230,7 @@ Design files cannot specify everything a full-stack project needs. D2C uses an *
 
 ## FAQ / Troubleshooting
 
-### `npx skills add d2c` fails with ENOENT?
+### \`npx skills add design2context\` fails with ENOENT?
 
 Ensure Node.js >= 18 is installed:
 
