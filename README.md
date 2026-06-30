@@ -34,21 +34,14 @@
 D2C is distributed as an AI skill package on npm. Install it with the `skills` CLI in one command:
 
 ```bash
-# Option 1: Install from npm registry (recommended)
-npx skills add design2context
+# Install from GitHub (recommended)
+npx skills add brickhu/d2c
 
-# Option 2: Install from GitHub
+# Install with full GitHub URL
 npx skills add https://github.com/brickhu/d2c
 ```
 
 The `skills` CLI automatically detects your AI coding tool environment and places the skill files in the correct directory:
-
-| Tool | Target Directory |
-|------|----------------|
-| **TRAE IDE** | `.trae/skills/d2c/` |
-| **TRAE CLI** | `.traecli/skills/d2c/` |
-| **Claude Code** | Project root (auto-detects `AGENTS.md`) |
-| **Cursor** | Project root (auto-detects `.cursorrules`) |
 
 > **💡 Tip:** The `skills` installer is a zero-dependency CLI tool. If you haven't used it before, `npx` will download and cache it automatically — no global install needed.
 
@@ -69,7 +62,7 @@ The `skills` CLI automatically detects your AI coding tool environment and place
 
 ```bash
 # 1. Install D2C
-npx skills add design2context
+npx skills add brickhu/d2c
 
 # 2. Go to your project directory
 cd my-project
@@ -170,7 +163,7 @@ Here's what a complete D2C session looks like from start to finish:
 
 ```bash
 # ── 1. Install ──
-npx skills add design2context
+npx skills add brickhu/d2c
 
 # ── 2. Start a project ──
 cd ~/Projects/dashboard-app
@@ -209,7 +202,7 @@ D2C's output context files follow standard conventions recognized by all major A
 - **Windsurf** — auto-loads `AGENTS.md`
 - **TRAE IDE / CLI** — loads via installed skill
 
-No additional configuration is needed. After \`npx skills add design2context\`, the context files are placed where your AI tool already looks.
+No additional configuration is needed. After \`npx skills add brickhu/d2c\`, the context files are placed where your AI tool already looks.
 
 ---
 
@@ -230,7 +223,7 @@ Design files cannot specify everything a full-stack project needs. D2C uses an *
 
 ## FAQ / Troubleshooting
 
-### \`npx skills add design2context\` fails with ENOENT?
+### \`npx skills add brickhu/d2c\` fails with ENOENT?
 
 Ensure Node.js >= 18 is installed:
 

@@ -34,21 +34,14 @@
 D2C 以 AI skill 包的形式发布在 npm 上。一条命令即可完成安装：
 
 ```bash
-# 方式一：从 npm 仓库安装（推荐）
-npx skills add design2context
+# 从 GitHub 安装（推荐）
+npx skills add brickhu/d2c
 
-# 方式二：从 GitHub 直接安装
+# 使用完整 GitHub URL 安装
 npx skills add https://github.com/brickhu/d2c
 ```
 
 `skills` CLI 会自动检测你的 AI 编码工具环境，并将 skill 文件安装到正确的目录：
-
-| 工具 | 目标目录 |
-|------|---------|
-| **TRAE IDE** | `.trae/skills/d2c/` |
-| **TRAE CLI** | `.traecli/skills/d2c/` |
-| **Claude Code** | 项目根目录（自动检测 `AGENTS.md`） |
-| **Cursor** | 项目根目录（自动检测 `.cursorrules`） |
 
 > **💡 提示：** `skills` 安装器是一个零依赖的 CLI 工具。如果你之前没用过，`npx` 会自动下载并缓存——无需全局安装。
 
@@ -69,7 +62,7 @@ npx skills add https://github.com/brickhu/d2c
 
 ```bash
 # 1. 安装 D2C
-npx skills add design2context
+npx skills add brickhu/d2c
 
 # 2. 进入你的项目目录
 cd my-project
@@ -170,7 +163,7 @@ cd my-project
 
 ```bash
 # ── 1. 安装 ──
-npx skills add design2context
+npx skills add brickhu/d2c
 
 # ── 2. 开始项目 ──
 cd ~/Projects/dashboard-app
@@ -209,7 +202,7 @@ D2C 输出的上下文文件遵循所有主流 AI 编码工具认可的标准约
 - **Windsurf** — 自动加载 `AGENTS.md`
 - **TRAE IDE / CLI** — 通过已安装的 skill 加载
 
-无需额外配置。`npx skills add design2context` 之后，上下文文件已被放置在你的 AI 工具已经会查找的位置。
+无需额外配置。`npx skills add brickhu/d2c` 之后，上下文文件已被放置在你的 AI 工具已经会查找的位置。
 
 ---
 
@@ -230,7 +223,7 @@ D2C 输出的上下文文件遵循所有主流 AI 编码工具认可的标准约
 
 ## 常见问题 / 故障排查
 
-### `npx skills add design2context` 失败并报 ENOENT？
+### `npx skills add brickhu/d2c` 失败并报 ENOENT？
 
 确保已安装 Node.js >= 18：
 
