@@ -1,25 +1,12 @@
-name: Publish to npm
-
 on:
   workflow_dispatch:
-    inputs:
-      packages:
-        description: 'Packages to publish (d2c, skills, or both)'
-        required: true
-        default: 'both'
-        type: choice
-        options:
-          - both
-          - d2c
-          - skills
 
 permissions:
-  id-token: write  # Required for OIDC trusted publishing
+  id-token: write
   contents: read
 
 jobs:
-  publish-d2c:
-    if: ${{ github.event.inputs.packages == 'd2c' || github.event.inputs.packages == 'both' }}
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,17 +15,3 @@ jobs:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
       - run: npm publish --access=public
-
-  publish-skills:
-    if: ${{ github.event.inputs.packages == 'skills' || github.event.inputs.packages == 'both' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          registry-url: 'https://registry.npmjs.org'
-      - run: npm install
-        working-directory: ./skills
-      - run: npm publish --access=public
-        working-directory: ./skills
