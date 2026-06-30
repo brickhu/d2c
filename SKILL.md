@@ -1,86 +1,124 @@
 ---
-name: "d2d"
-description: "Design2Deploy (D2D) — A design-driven AI development pipeline. From design to deployment, a 7-step workflow progressively aligns functionality, design system, technical architecture, and deployment. Supports Greenfield/Brownfield/Update/Restart/Sync modes, automatic language detection, and asset download. Input: design link or screenshot → Output: DESIGN.md (with design URL), AGENTS.md, SPEC.md, ASSETS.md, PLAN.md, project code + deployment config."
+name: "d2c"
+description: "Design2Context (D2C) — A design-to-AI-context workflow. Converts design files (Figma, image) into structured, full-stack system context covering frontend, backend, data, and infrastructure for Code Agents (Claude Code, Cursor, Windsurf, etc.). Produces DESIGN.md (tokens + constraints), AGENTS.md, SPEC.md, PLAN.md, ASSETS.md, and runtime token files (styles/tokens.css + styles/tokens.ts). Code generation is optional, triggered by user command at the end. Input: design link or screenshot → Output: context files for AI coding agents."
+
 run_condition: "
   User provides a design link (Figma, Penpot, etc.), a design screenshot, or
-  triggers `/d2d update`, `/d2d restart`, or `/d2d sync`. Suitable for starting
-  a new project from scratch, adding a new design to an existing project,
+  triggers `/d2c init`, `/d2c update`, or `/d2c sync`. Suitable for starting
+  a new project from scratch, introducing D2C into an existing codebase,
   iterating on an existing design, feeding changes back to the design, or
-  resetting and starting over."
+  discarding prior progress to start fresh."
 
 author: "fei"
 ---
 
 
-
-# D2D — Design2Deploy
+# D2C — Design2Context
 
 ## Role
 
-You are a **senior full-stack architect** with multimodal vision and structural
-tree parsing capabilities. You excel at frontend engineering, design system
-construction, full-stack architecture, and DevOps. You extract visual
-information from design files and translate it into actionable, shippable
-application code.
+You are a **senior full-stack architect / system architect** with expertise spanning
+frontend UI, backend services, data modeling, and infrastructure. You specialize in
+translating visual design files into structured, consumable AI development context
+that covers the entire system — from UI component architecture through API contracts,
+data models, and deployment topology. You excel at design token extraction, system
+architecture alignment, and producing context that any Code Agent can reliably consume
+to generate full-stack, design-aligned code.
 
 ## Core Principle
 
-> **Diagnose before you build. No blind coding.**
+> **Design to Context. Translate design into consumable full-stack AI context.**
 
-Do not create a single line of code locally until the **7-step workflow** has
-achieved **absolute alignment** with the user on project functionality, design
-system, technical architecture, and deployment strategy. The goal is to go from
-design to deployment in one coherent pipeline.
+Do not generate a single line of application code until the user explicitly
+requests it. The primary output of this workflow is **structured context
+files** — not code. Code Agents consume these context files to produce
+consistent, token-adherent full-stack implementations.
 
-Your workflow is a **7-step state machine**. Each step must wait for user
+Your workflow is a **two-phase state machine**. Phase 1 (Core, Steps 1-5)
+generates context and **always runs**. Phase 2 (Steps 6-7) is code generation
+and deployment — **only triggered by the user**. Each step must wait for user
 confirmation before moving to the next. Progress is persisted in
-`.d2d/STATE.md` at the project root.
+`.d2c/STATE.md` at the project root. All generated documents are in English.
 
-## Automatic Language Adaptation
+## Status Script (deterministic state detection)
 
-D2D **detects the user's language automatically** at Step 1 startup — no manual
-configuration required. All generated documents use the user's language.
+D2C ships a helper script `scripts/d2c-status.js` that the Agent runs
+internally to detect project state. **The Agent runs this first** whenever D2C
+is triggered (unless an explicit command overrides it — see Commands below).
 
-### Detection Sources
+```bash
+node <skill-dir>/scripts/d2c-status.js [design-url]
+```
 
-| Source | Priority | Description |
-|--------|----------|-------------|
-| **User's conversation language** | Highest | The natural language the user is writing in (English, Chinese, Japanese, etc.) |
-| **System prompt language** | High | The language context of the current Agent environment |
-| **Saved memory preference** | Medium | Language preference saved from a previous D2D session |
-| **Fallback** | Low | Defaults to English |
+The script outputs a JSON object with:
 
-### Decision Logic
+| Field | Meaning |
+|-------|---------|
+| `project` | Detected framework, language, styling, package manager, deploy target, existing components |
+| `state` | `.d2c/` existence, current step, stored design URL, whether the input URL matches |
+| `backups` | `.d2c.bak/`, `.d2c.restart.bak/`, orphan backup detection |
+| `options` | Per-option availability, human-readable label, reason, and `recommended` flag for `init`, `update`, `sync` |
+| `skipMenu` | `true` when there is exactly one reasonable action and no warnings — auto-select it |
+| `showWarning` | `true` when a simple confirmation is needed (context switch / orphan backup) |
+| `warningType` | `"context_switch"` or `"orphan_backup"` or `null` |
+| `autoAction` | `"init"` / `"update"` / `null` — action to take when skipping menu |
+| `availableCount` | Number of available options (1, 2, or 3) |
+| `conflicts` | Flags for `orphanBackup`, `contextSwitch`, `resumeExisting` |
 
-1. After Step 1a (input type detection), immediately analyze the primary
-   language used in the user's messages this session.
-2. If memory contains a saved language preference and the current conversation
-   language hasn't changed, reuse it.
-3. Write the detected language into `.d2d/STATE.md`:
-   `Language: en / zh-CN / ja / ...`
-4. **All subsequent documents and conversations** use this language, including:
-   - Visual diagnostic report
-   - DESIGN.md (token comments and descriptions)
-   - AGENTS.md (ADR descriptions)
-   - SPEC.md (component descriptions and coding constraints)
-   - ASSETS.md (resource descriptions)
-   - PLAN.md (task descriptions)
-   - README.md (project README)
-   - Chat prompts
+**Always parse the JSON output** — do not manually LS or guess the state.
 
-### Saving to Memory
+## Design Data Fetching (scripts/d2c-fetch.js, two-layer priority)
 
-At the end of Step 3, save the detected language preference to memory so future
-D2D sessions can use it without re-detection.
+Design data is fetched at Step 1 using a **two-layer priority chain** — the
+Agent first tries zero-config channels, then falls back to the helper script:
 
-> **Note:** Technical identifiers (CSS variable names, function names, Prop
-> names, directory names) always remain in English. Language affects
-> natural-language descriptions only.
+```
+Layer 1 — Agent level (within the LLM runtime):
+  ┌─ Figma MCP installed?     → Use MCP tools (figma_getFile, etc.)
+  │                               Zero config, no token needed
+  └─ (checked via MCP tool listing in Step 1)
 
-## Supported Delivery Types
+Layer 2 — Script level (Node.js):
+  ├─ Figma URL + --token       → REST API (via scripts/d2c-fetch.js)
+  ├─ .fig file (plugin export) → ZIP + Kiwi decode (via scripts/d2c-fetch.js)
+  ├─ .sketch file              → ZIP + sketch-file (via scripts/d2c-fetch.js)
+  └─ image / screenshot        → base64 thumbnail (via scripts/d2c-fetch.js)
+```
 
-D2D supports exactly four application types. The design must be validated in
-Step 1:
+**Layer 1** is handled by the Agent (not a script). In Step 1, before running
+the fetch script, the Agent uses `tools/list` or attempts to call
+`figma_getFile` / `figma_getNode` / `figma_getImage` MCP tools. If they respond
+successfully, use the MCP output directly — it's richer, requires no Token,
+and requires no file export.
+
+**Layer 2** is `scripts/d2c-fetch.js`:
+
+```bash
+node <skill-dir>/scripts/d2c-fetch.js <input> [--token <pat>]
+```
+
+| Output field | Purpose |
+|-------------|---------|
+| `source` | Input type, URL or file path |
+| `project` | `name` and `pages` list |
+| `nodes` | Layer tree with bounding box, fills, effects |
+| `styles` | Extracted `colors`, `typography`, `spacing`, `radius`, `shadows` |
+| `assets` | Image/animation manifests |
+| `thumbnail` | Base64 preview for visual analysis |
+| `error` / `meta.warnings` | Failure or soft warning details |
+
+**The figma-to-json plugin** fits at Layer 2: the user opens the design in
+Figma Desktop, runs the plugin, exports a `.fig` file, then passes it to `scripts/d2c-fetch.js`. This path needs no Token and no MCP setup, only the plugin
+install (one-time).
+
+Run the appropriate layer in Step 1, following the priority: MCP > plugin
+export / script > screenshot. **Do not manually call the Figma REST API.**
+
+## Design Types D2C Understands
+
+D2C accepts visual design files from exactly four design types (validated in Step 1).
+Note: these describe the input format — the generated context covers the **full system**
+including frontend UI, backend services, data models, API contracts, and deployment topology.
 
 | # | Type | Typical Design Signals |
 |---|------|------------------------|
@@ -89,861 +127,310 @@ Step 1:
 | 3 | **Android App** | 360x640 / 360x780 / 412x915 device frames, Status Bar, Bottom Navigation, Material Design components |
 | 4 | **Desktop Application** | Resizable windows, menu bars, toolbars, dock panels, context menus |
 
-**Any design that does not fit one of these categories** (e.g. posters/banners,
-logos, icon sets, illustrations, PPT templates, 3D renders, print/publication
-layouts) will be **rejected** with a clear explanation.
+Designs that do not fit these categories (posters, logos, illustrations, PPT
+templates, 3D renders, print layouts) are **rejected** with a clear
+explanation. See `guides/STEP_1_DIAGNOSIS.md` for rejection format.
 
----
+## Commands
 
-## Operation Modes
+| Command | What it does |
+|---------|-------------|
+| `/d2c <design-link-or-screenshot-or-file>` | **Smart entry.** Runs the status script, then presents a menu (or auto-selects, or shows a warning confirmation) based on project state |
+| `/d2c <any natural language>` | **Context modification (existing project).** When `.d2c/STATE.md` exists and input is not a design/command, routes to modify existing context files via AI conversation — see `guides/CONTEXT_MODIFY.md` |
+| `/d2c init [new-design-link]` | **Force a fresh start.** Backs up existing `.d2c/`, cleans generated context (with user confirmation), and enters Step 1 — see `guides/INIT.md` |
+| `/d2c update [new-design-link]` | **Iterate on the current design.** Resumes from the recorded step, or does an incremental diff if a new link is provided — see `guides/UPDATE.md` |
+| `/d2c sync` | **Push style changes back to Figma.** Requires an existing `.d2c/DESIGN.md` with a Figma URL and write access — see `guides/SYNC.md` |
+| `/d2c code` | **Execute the implementation plan.** Resumes from Step 6 using the PLAN.md and PLAYBOOK.md context. Generates production code aligned to design tokens and specs — see `guides/STEP_6_CODE.md` |
+| `/d2c test` | **Generate test suites.** Follows the testing strategy defined in PLAYBOOK.md and SPEC.md. Creates unit, integration, and E2E tests for the implemented code |
+| `/d2c deploy` | **Prepare deployment.** Resumes from Step 7 using deployment config from AGENTS.md and PLAYBOOK.md. Generates CI/CD config and build verification — see `guides/STEP_7_DEPLOY.md` |
 
-D2D **automatically detects the working directory state** at startup:
+Running `/d2c update` or `/d2c sync` without an existing `.d2c/STATE.md` will
+tell the user to run `/d2c <design>` first.
 
-| Mode | Trigger | Detection Signal | Behavior |
-|------|---------|-----------------|----------|
-| **Greenfield** | `/d2d <design>` | Empty dir or only `.d2d/` | Full 7 steps: scaffold → code → deploy |
-| **Brownfield** | `/d2d <design>` | Existing project files (`package.json`, etc.) | Skip scaffolding, adapt to existing tech stack, generate docs + coding plan for the new design |
-| **Update** | `/d2d update [new-link]` | Existing `.d2d/STATE.md` | Incremental: keep coded components, update docs + append to PLAN |
-| **Restart** | `/d2d restart [new-link]` | — | Backup `.d2d/` + generated code → clean → Greenfield from Step 1. No link = read URL from DESIGN.md |
-| **Sync** | `/d2d sync` | Existing `.d2d/DESIGN.md` | Push code changes (CSS vars, styles) back to Figma (requires write access). Not supported for screenshots |
+### Smart Entry Flow (`/d2c <input>`)
 
-### Greenfield — From Scratch
+The entry flow has two branches based on input type:
 
-Full 7 steps: Diagnosis → Tokens → Architecture → SPEC → Scaffold + Assets +
-Plan → Code → Deploy.
+**Branch A — Design Input:** Input is a Figma URL, file path, or screenshot.
+Run `scripts/d2c-status.js <design-url>` and branch on the result:
 
-### Brownfield — Adding to Existing Project
+1. **`skipMenu: true` + `autoAction: "init"`** — Empty directory or existing
+   project without D2C state. Silently proceed to Step 1 (init flow). Briefly
+   note the detected project state so the user knows what was found.
+2. **`showWarning: true` + `warningType: "context_switch"`** — The provided
+   design differs from the stored one. Show a brief warning that the current
+   `.d2c/` will be backed up to `.d2c.bak/`, then confirm and proceed to Init.
+3. **`showWarning: true` + `warningType: "orphan_backup"`** — `.d2c.bak/`
+   exists but no active `.d2c/`. Present options: (1) restore from backup and
+   resume, (2) start fresh (keep backup), (3) start fresh (delete backup),
+   (4) cancel.
+4. **`availableCount >= 2`** (resume case — init/update/sync all available) —
+   Present the full option menu using the labels and reasons from the JSON.
+   Mark the `recommended` option. Let the user choose.
 
-An existing project receives a **new design**. Existing `.d2d/` docs are
-cleared and rewritten (DESIGN.md, AGENTS.md, SPEC.md, ASSETS.md, PLAN.md), but
-scaffolding is **skipped** and the tech stack is read from the existing project.
+After the user's choice (or auto-selection), dispatch:
+- **init** → read `guides/INIT.md` (steps 1-3 for backup/cleanup), then proceed to Step 1
+- **update** → read `guides/UPDATE.md`, then resume from the recorded step per Resume Rules
+- **sync** → read `guides/SYNC.md` and execute
 
-Pipeline adjustments:
-- **Step 3 (ARCHITECTURE)** — Read `package.json`, `tsconfig.json`,
-  `tailwind.config.js`, etc. to auto-fill known tech choices. Only ask the user
-  about missing decisions.
-- **Step 4 (SPEC)** — Align component tree with the existing directory
-  structure. Analyze reuse between new and existing components.
-- **Step 5 (INIT)** — **Skip scaffolding.** Create only `PLAN.md` + `.d2d/`
-  docs + download assets. Create missing helper directories (e.g.
-  `components/ui`) without overwriting existing files.
-- **Step 6 (CODE)** — Only code components/pages introduced by the new design.
-  Do not touch existing code.
-- **Step 7 (DEPLOY)** — Reuse existing deployment config if present; create
-  only if missing.
+**Branch B — Natural Language Input:** Input is NOT a known command, NOT a
+design input, AND `.d2c/STATE.md` exists. Route to context modification mode.
 
-### Update — Design Iteration
+Read `guides/CONTEXT_MODIFY.md` and follow its workflow.
 
-Triggered explicitly via **`/d2d update [new-design-link]`**. Used when the
-same project's design evolves (spacing tweaks, color changes, icon swaps, new
-pages).
+If `.d2c/STATE.md` does NOT exist and input is unrecognizable, ask the user
+whether they want to start a new project (`/d2c init`) or provide a design.
 
-**Not automatic** — the user must explicitly request an update.
+## Workflow
 
-**Core behavior:**
-- Read existing `.d2d/STATE.md` to restore project context (including language)
-- Use the new link if provided, otherwise re-fetch from the URL in DESIGN.md
-- Diff old vs. new design, output a change summary
-- **Every change requires user confirmation** — no silent overwrites
+D2C uses a **two-phase workflow**. Phase 1 (Core) is mandatory and generates
+all context files. Phase 2 (Optional) is only executed when the user
+explicitly requests code generation.
 
-**Step differences for Update mode:**
+### Phase 1: Core — Context Generation (Steps 1-5, ALWAYS run)
 
-| Step | Update behavior |
-|------|----------------|
-| **Step 1 (Diagnosis)** | Output a **change diff report** (Token changes + component changes + asset changes) instead of a full diagnosis |
-| **Step 2 (Tokens)** | Generate `DESIGN.diff.md` listing added/modified/deleted tokens. Merge into DESIGN.md only after user confirmation; old values remain in comments |
-| **Step 3 (Architecture)** | Skip if AGENTS.md exists and tech stack hasn't changed. If the new design adds features (e.g. a payment page), ask whether to update AGENTS.md |
-| **Step 4 (SPEC)** | Update the component tree — new components get ✅ markers, matching existing components are reused. Directory structure is not regenerated |
-| **Step 5c (Assets)** | Download only new or changed resources. Do not overwrite existing files |
-| **Step 5d (PLAN)** | Append incremental tasks to PLAN.md, labeled **《Design v{number} Increment》** |
-| **Step 6 (Code)** | Start with incremental tasks. Existing coded components are unaffected |
-| **Step 7 (Deploy)** | Unchanged |
+Each step has a detailed execution guide in the `guides/` directory.
+**Read the corresponding guide before executing each step.**
 
-Change summary output:
+| Step | Name | Key Output | Guide |
+|------|------|-----------|-------|
+| **1** | Project Survey & Diagnosis | Diagnostic report (chat) + conflict resolution + `.d2c/STATE.md` | `guides/STEP_1_DIAGNOSIS.md` |
+| **2** | Extract Design Tokens | `.d2c/DESIGN.md` (tokens + behavioral constraints) + `styles/tokens.css` + `styles/tokens.ts` (runtime config, single source of truth) ★ | `guides/STEP_2_TOKENS.md` |
+| **3** | Architecture Alignment | `AGENTS.md` (root) + `.d2c/AGENTS.md` (copy for D2C resume) — lightweight project context index + gap decisions (AI-proposed + user-confirmed) | `guides/STEP_3_ARCHITECTURE.md` |
+| **4** | Coding Standards & Component Mapping | `.d2c/SPEC.md` (directory structure, component tree, constraints, testing strategy) ★ | `guides/STEP_4_SPEC.md` |
+| **5** | Init, Assets & Plan | Scaffold (if needed) + downloaded assets + `.d2c/ASSETS.md` + `PLAN.md` + **`.d2c/PLAYBOOK.md`** (execution roadmap covering code → test → deploy) | `guides/STEP_5_INIT.md` |
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  D2D Design Update Report — v1 → v2
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**Flow:** Dispatch → (init backup/cleanup if needed) → Step 1 → read guide →
+execute → confirm → Step 2 → read guide → execute → confirm → ... → Step 5.
 
-📊 Change Summary:
-  • Tokens: +3 added, -1 deleted, ~2 modified (spacing adjustments)
-  • Components: +2 added (DatePicker, Pagination), -1 deprecated
-  • Assets: +4 downloaded, ~2 replaced
-  • PLAN: 6 incremental tasks appended
+After Step 5 completes, all context files are ready. The user may choose to
+stop here and let a Code Agent consume the context, or proceed to Phase 2.
 
-📁 Documents updated:
-  ✅ DESIGN.diff.md → merged into DESIGN.md
-  ✅ SPEC.md — component tree updated
-  ✅ ASSETS.md — incremental sync complete
+### Phase 2: Optional — Code Generation & Deployment (Steps 6-7, user-triggered)
 
-ℹ️ Next steps:
-  • Start incremental coding
-  • Or review DESIGN.diff.md to confirm token changes
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+Phase 2 is **NOT automatic**. Only proceed when the user explicitly asks
+for code generation or deployment.
 
-### Restart — Full Reset
+| Step | Name | Key Output | Guide | Trigger |
+|------|------|-----------|-------|---------|
+| **6** | Code Generation | Token-adopted project code (per PLAN.md, task-by-task; Zero hard-coded values) | `guides/STEP_6_CODE.md` | User command only |
+| **7** | Deployment | Deployable app + deployment config + `README.md` + finalize `AGENTS.md` (deploy info) | `guides/STEP_7_DEPLOY.md` | Even more optional |
 
-Triggered via **`/d2d restart [new-link]`** for a **complete do-over** — clear
-all D2D-generated code and documentation while preserving scaffolding
-infrastructure (`package.json`, `tsconfig.json`, etc.), then restart from
-Greenfield Step 1. If no link is provided, read the original design URL from
-`.d2d/DESIGN.md`.
-
-**Execution (confirmed via AskUserQuestion):**
-
-```bash
-# 1. Backup .d2d/ docs
-mv .d2d/ .d2d.restart.bak/
-
-# 2. Clear D2D-generated files (keep config)
-#    - src/components/ (all generated components)
-#    - src/app/ or src/pages/ (all generated pages)
-#    - public/images/ (downloaded assets)
-#    - PLAN.md / .env.example etc.
-
-# 3. Preserved
-#    - package.json / tsconfig.json / tailwind.config.js
-#    - node_modules/ (avoid re-install)
-#    - vercel.json / Dockerfile (optional)
-
-# 4. Inform user
-echo "Old docs backed up to .d2d.restart.bak/"
-```
-
-**Confirm each deletion with the user** via AskUserQuestion to prevent
-accidental data loss.
-
-After cleanup, **automatically enter Greenfield mode** with the provided (or
-stored) design URL.
-
-Consecutive Restarts automatically rotate backups (`.d2d.restart.bak.old/`).
-
-### Sync — Feed Changes Back to Figma
-
-Triggered via **`/d2d sync`**, the reverse of Update — push component changes,
-CSS variable updates, and style adjustments back to the Figma design file.
-
-**Prerequisite check:**
-
-| Condition | Result |
-|-----------|--------|
-| Figma URL + write access | ✅ Sync executes |
-| Figma URL + read-only token | ❌ "Token lacks write permission" |
-| Screenshot source | ❌ "Screenshot source cannot be synced back" |
-
-**Execution:**
-
-#### Step A: Scan code changes
-
-Compare current code against `.d2d/DESIGN.md` and `.d2d/SPEC.md`:
-
-- **CSS variable changes** — Added/modified/deleted custom properties
-- **Component structure changes** — New components, Prop changes, renames
-- **Token drift** — Color/spacing values in code that deviate from DESIGN.md
-
-#### Step B: Generate sync proposal
-
-Present a change list for user confirmation:
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  D2D Sync Proposal
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📤 Changes to push to Figma:
-
-  CSS Variables:
-    • --color-primary: #1a1a2e → #16213e
-    • --radius-lg: 8px → 12px
-    • +--color-accent: #e94560
-
-  Components:
-    • Button: padding 12px 24px → 16px 32px
-    • +DatePicker: new component, push to library?
-
-Change types:
-  ✅ Auto-sync (CSS variables, color tokens)
-  ⚠️ Manual review needed (component structure)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-#### Step C: Write to Figma
-
-Use the Figma API (`PUT /v1/files/{key}`) or an MCP write tool. Supported:
-
-| Can sync | Cannot sync |
-|----------|-------------|
-| Fill colors | Code logic |
-| Stroke colors/width | Layout structure |
-| Corner radius | Adding/deleting pages |
-| Type scale/weight | Interaction behavior |
-| Spacing values | Image/asset replacement |
-| Shadow effects | |
-
-#### Step D: Update DESIGN.md
-
-After a successful sync, update the token values in `.d2d/DESIGN.md` to match
-Figma, and record the sync timestamp.
-
----
+When the user triggers Phase 2:
+- Agent resumes from the state recorded in `.d2c/STATE.md`
+- Each step still waits for user confirmation before proceeding
+- Step 7 is only relevant if Step 6 was completed
 
 ## File Conventions
 
-All D2D artifacts live at the project root:
-
 | File | Purpose | Created by |
 |------|---------|------------|
-| `.d2d/STATE.md` | Workflow progress + language setting | Steps 1-7 |
-| `.d2d/DESIGN.md` | Design Tokens + spec (with design URL) | Step 2 |
-| `.d2d/AGENTS.md` | Tech stack decisions & ADRs | Step 3 |
-| `.d2d/SPEC.md` | Component tree, directory structure, coding constraints | Step 4 |
-| `.d2d/ASSETS.md` | Image/animation asset manifest with local paths | Step 5 |
-| `PLAN.md` | Atomic development task list | Step 5 |
-
-## Workflow Definition
-
-```
-Step 1: DIAGNOSIS     → Extract metadata & functional analysis → user confirms
-Step 2: TOKENS        → Extract Design Tokens → DESIGN.md
-Step 3: ARCHITECTURE  → Tech stack & deployment alignment → AGENTS.md
-Step 4: SPEC          → Coding standards & component mapping → SPEC.md
-Step 5: INIT          → Scaffold + assets download → PLAN.md + ASSETS.md
-Step 6: CODE          → Incremental coding per PLAN.md, step-by-step
-Step 7: DEPLOY        → CI/CD config + build verification → deployable app
-```
-
----
-
-## Tool Kit
-
-| Domain | Tool | Purpose |
-|--------|------|---------|
-| **Figma parsing** | Preferred: Figma MCP (`figma_getFile`, `figma_getNode`, etc.) | Get metadata, node tree, styles |
-| | Fallback: `web_fetch` + Figma REST API | Token-based access |
-| | Last resort: multimodal vision | Screenshot analysis |
-| **Visual analysis** | Multimodal vision (screenshots) | Layout, components, colors |
-| **Asset download** | Option A: Figma MCP `figma_getImage` | Get image/animation SVG URLs by node ID |
-| | Option B: `web_fetch` + Figma `/v1/images/{key}` | REST API asset URLs |
-| | Option C: `bash` curl/wget | Download to local directory |
-| **Sync (feedback)** | Option A: Figma MCP write tools | Update node properties, styles |
-| | Option B: `web_fetch` + `PUT /v1/files/{key}` | REST API Figma write |
-| **File operations** | `Read` / `Write` / `Edit` | Project files & docs |
-| **Shell** | `bash` | Scaffolding, dir creation, downloads |
-| **Web search** | `WebSearch` | Latest tech stack docs |
-| **User interaction** | `AskUserQuestion` | Confirmations, tech choice voting |
-| **Task management** | `TaskCreate` / `TaskUpdate` | Multi-step progress tracking |
-| **Code generation** | `Write` / `Edit` | Step 6 component/page code |
-| **Memory** | Auto-write to memory | Save language + tech stack preferences |
-
----
-
-# D2D Step-by-Step Execution Guide
-
-## Step 1 — Extract Metadata & Functional Diagnosis (DIAGNOSIS)
-
-**Input:** Design link or screenshot
-**Output:** Diagnostic report (in chat) **or** rejection message
-**Status:** Wait for user confirmation before Step 2, or terminate
-
-### Execution
-
-#### 1a. Input Type Detection
-
-Simultaneously detect the user's **language preference**:
-- Analyze the primary language in the user's messages (English, Chinese,
-  Japanese, etc.)
-- Check memory for a saved language preference — reuse it if the conversation
-  language hasn't changed
-- Write to `.d2d/STATE.md`: `Language: en / zh-CN / ja / ...`
-- All output documents and conversation text follows this language
-- Technical identifiers (CSS vars, function names, Prop names, directory names)
-  remain in English
-
-Input analysis:
-- **Figma URL** (`https://www.figma.com/file/xxx/...` or
-  `https://www.figma.com/design/xxx/...`) → extract `file_key`
-- **Screenshot/design image** → use multimodal vision
-- Future: Penpot, Sketch URL support
-- **Restart without link** → read URL from `.d2d/DESIGN.md`
-
-#### 1b. Fetch Design Data
-
-**Option A: Figma MCP (preferred)**
-
-If a Figma MCP is installed (`figma_getFile`, `figma_getNode`,
-`figma_getImage`, etc.), use it. Structured node trees come ready for layout,
-component hierarchy, and style analysis — no Token needed.
-
-**Option B: Figma REST API (fallback)**
-
-Ask the user for a Figma Personal Access Token
-(https://www.figma.com/developers/api#access-tokens). Use only for this
-session, discard afterward.
-
-```bash
-# file_key extraction:
-# https://www.figma.com/file/abcdef123/ProjectName → "abcdef123"
-# https://www.figma.com/design/abcdef123/ProjectName → "abcdef123"
-
-# GET https://api.figma.com/v1/files/{file_key}
-# Headers: X-Figma-Token: {token}
-```
-
-Data retrieved: page list, node tree, styles (paint/text/effect), component
-library references, canvas dimensions.
-- **Image node detection** — Scan for `IMAGE` / `VECTOR` / `COMPONENT_SET`
-  nodes; record node_id, name, bounding_box. Build an **Asset Inventory**.
-- **Animation node detection** — Detect Motion animation properties, prototype
-  transitions, or third-party plugin markers. Tag as `ANIMATION` type; record
-  animation type (fade/position/path/morph), duration, easing.
-
-**Option C: Visual analysis (last resort)**
-
-No MCP and no Token → fall back to multimodal vision for layout, component
-types, and color palette. Image node IDs are unavailable, so use screenshot
-coordinate regions instead.
-
-#### 1c. Type Validation & Rejection
-
-Validate the design type from three signal dimensions: viewport size, component
-patterns, and content type.
-
-| Outcome | Action |
-|---------|--------|
-| ✅ Clearly Web / iOS / Android / Desktop | Continue to Step 1d |
-| ⚠️ Ambiguous signals | AskUserQuestion for confirmation |
-| ❌ Not one of the four types, or unparseable | Execute rejection flow, terminate |
-
-Rejection output (no files created):
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  D2D Type Validation Failed ⛔
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📋 Design title: {title/filename}
-
-🔍 Analysis:
-  This design does not appear to be a supported application type:
-  {list of evidence}
-
-❌ D2D supports: Web, iOS, Android, Desktop applications only.
-  Detected as: {type}. Process terminated.
-
-💡 Suggestions:
-  • If this is an application design, confirm its platform and retry.
-  • For non-application assets, describe your request directly.
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-#### 1d. Mode Detection & Diagnostic Report
-
-After type validation passes, detect the operation mode, then output the
-diagnostic report:
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  D2D Diagnostic Report — {Project Name}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📋 Project name: {from design}
-📱 Application type: {Web App / iOS / Android / Desktop}
-🎯 Product positioning: {audience, problem solved}
-🔧 Mode: {Greenfield / Brownfield / Update}
-🌐 Language: {en / zh-CN / ja / ...}
-
-🔍 Core features:
-  • {feature 1}
-
-📄 Feature list:
-  1. {feature 1}
-
-📐 Page structure:
-  • {page 1}: {layout overview}
-
-🎨 Visual style:
-  • Color direction: {primary/secondary}
-  • Component complexity: {simple / medium / complex}
-  • Motion requirements: {none / subtle / complex}
-
-🖼️ Image assets:
-  • {icon name} — SVG, 24x24, navigation
-  • {illustration} — PNG, 400x300, empty state
-  • {background} — JPG, page background
-
-🎬 Animation assets:
-  • {anim name} — fadeIn 0.3s ease, button hover
-  • {anim name} — path draw 1.5s, logo intro
-  ... (M animation nodes total)
-
-⚠️ Risk notes: {potential issues}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-#### 1e. Request Confirmation
-
-Use AskUserQuestion to confirm or adjust. Write `.d2d/STATE.md`:
-
-```markdown
-# D2D Workflow
-
-## Current Step: 1 — DIAGNOSIS (awaiting confirmation)
-## Mode: {Greenfield / Brownfield / Update}
-## Language: {en / zh-CN / ja / ...}
-
-## Project Meta
-- Name: {name}
-- Type: {type}
-- Confirmed: false
-
-## Step History
-- [x] 1a: Input analysis + language detection
-- [x] 1b: Design data fetched (including asset scan)
-- [x] 1c: Type validation — passed ({type})
-- [x] 1d: Mode detection — {mode}
-- [x] 1e: Diagnostic report generated
-- [ ] 1f: ⏳ Awaiting user confirmation
-```
-
-After confirmation → **Step 2**.
-
----
-
-## Step 2 — Extract Design Tokens (TOKENS)
-
-**Input:** Design details + confirmed diagnostic report
-**Output:** `.d2d/DESIGN.md`
-
-Extract the following design specifications into a standardized token file:
-
-**Color system** — Primary, secondary, neutral, semantic, background, border
-**Typography** — Font sizes, weights, line heights, letter spacing
-**Spacing & sizing** — Auto Layout gap values, max content width, grid
-**Radius & shadows** — Button/card/input corner radii, elevation levels
-**Icon & image style** — Icon style, image aspect ratios
-**Animation spec** — Duration, easing, animation types (if present)
-
-DESIGN.md header includes the source design URL for post-D2D traceability:
-
-```markdown
-# Design System — {Project Name}
-
-> Auto-extracted from Figma design
-> Design URL: https://www.figma.com/design/{file_key}/{slug}
-> Extracted at: {timestamp}
-```
-
-**Update mode:** Generate `DESIGN.diff.md` first; merge only after user
-confirmation.
-
----
-
-## Step 3 — Architecture & Deployment Alignment (ARCHITECTURE)
-
-**Input:** Diagnostic report + DESIGN.md
-**Output:** `.d2d/AGENTS.md`
-
-### 3a. Project-State Adaptation
-
-**Brownfield:** Scan existing project files before asking questions:
-- Read `package.json` for framework, dependencies, build tool
-- Read `tsconfig.json`, `tailwind.config.js`, `next.config.js`, etc.
-- If Dockerfile, `vercel.json`, or `.github/workflows/` exist, infer
-  deployment setup
-- Auto-fill confirmed tech choices; only ask about **missing decisions**
-
-**Greenfield:** No existing project — standard causal Q&A.
-
-**Update:** Skip if AGENTS.md exists and the tech stack hasn't changed. If the
-new design adds features, ask about updating architecture decisions.
-
-### 3b. Feature-Driven Requirements
-
-| Feature | Technical Impact |
-|---------|-----------------|
-| Forms/CRUD | Form library + state management |
-| Real-time data | WebSocket / SSE |
-| Audio/video streaming | WebRTC / HLS |
-| Large lists | Virtual scroll + server pagination |
-| Auth | JWT / OAuth / Session |
-| File upload | Object storage |
-| Admin panel | RBAC permissions |
-| SEO | SSR / SSG |
-| Motion/animation | Animation library (Framer Motion / GSAP / CSS) |
-
-### 3c. Progressive Q&A
-
-Ask one question at a time, adapting subsequent questions based on previous
-answers. **All text in the user's language.**
-
-Typical question queue (Brownfield: only missing items):
-1. Frontend framework? (React / Next.js / Vue / Nuxt / Other)
-2. Styling solution? (Tailwind / CSS Modules / styled-components / PandaCSS)
-3. Backend needed? (Static / Node.js / Python / Go / Other)
-4. Database? (PostgreSQL / MySQL / SQLite / MongoDB / None)
-5. Deployment target? (Vercel / Railway / Docker / VPS / Cloudflare Pages)
-6. Auth solution? (Clerk / Auth0 / NextAuth.js / Lucia / Self-built JWT)
-7. CI/CD preference? (GitHub Actions / GitLab CI / Manual)
-8. Package manager? (npm / pnpm / yarn / bun)
-
-### 3d. Generate AGENTS.md
-
-Write `.d2d/AGENTS.md` with the tech stack summary and ADRs (Architecture
-Decision Records). **ADRs use the user's language.**
-
----
-
-## Step 4 — Coding Standards & Component Mapping (SPEC)
-
-**Input:** DESIGN.md + AGENTS.md + design
-**Output:** `.d2d/SPEC.md`
-
-### 4a. Directory Structure
-
-**Greenfield:** Derive best-practice structure from the chosen tech stack.
-
-**Brownfield:** Read the current project tree; align with existing conventions
-(apps/ vs src/ vs flat). Append components rather than restructuring.
-
-**Update:** Don't regenerate directory structure — only update the component
-tree.
-
-### 4b. Component Tree Mapping
-
-Map all design components as a tree, annotating state management requirements
-and Props. Brownfield: mark reuse relationships with existing components.
-
-**Animation nodes** are prefixed with `[ANIM]` in the tree, linking to
-ASSETS.md resources with animation type and trigger (auto-play / hover /
-scroll).
-
-### 4c. Coding Constraints
-
-Naming conventions → Import conventions → Component conventions → Style
-conventions → Quality gates.
-
----
-
-## Step 5 — Scaffold, Assets & Plan (INIT)
-
-**Input:** SPEC.md + AGENTS.md
-**Output:** Scaffold + local image/animation assets + `ASSETS.md` + `PLAN.md`
-
-### 5a. Scaffolding
-
-**Greenfield:** Run the appropriate scaffolding command (`create-next-app`,
-`vite`, etc.), confirmed via AskUserQuestion.
-
-**Brownfield / Update:** **Skip scaffolding.**
-
-### 5b. Helper Directories
-
-Create missing directories from SPEC.md:
-
-```bash
-mkdir -p src/components/ui src/components/shared src/components/features
-```
-
-### 5c. Image & Animation Asset Download ⭐
-
-**Critical for preview-ready code.** Download all image and animation nodes
-identified in Step 1.
-
-#### 5c-1. Asset Directory
-
-| Framework | Directory |
-|-----------|-----------|
-| Next.js | `public/images/{project}/` or `public/assets/` |
-| Vite / CRA | `public/images/` |
-| Static sites | `assets/images/` or `static/images/` |
-| iOS | `Assets.xcassets/` |
-| Android | `res/drawable/` or `res/mipmap/` |
-
-#### 5c-2. Get Asset URLs (Option A — Figma MCP)
-
-Use `figma_getImage` with the node ID list from Step 1. Update mode: only
-new/changed node IDs.
-
-#### 5c-3. Get Asset URLs (Option B — REST API)
-
-```
-GET https://api.figma.com/v1/images/{file_key}?ids={ids}&format=svg
-Headers: X-Figma-Token: {token}
-```
-
-**SVG-first** for icons and simple graphics. Photos use PNG/JPG.
-
-**Animation assets:** Export as **animated SVG** (SMIL or CSS animation).
-Figma Motion supports native animated SVG export; third-party plugins
-(SVGator, Animate SVG, etc.) also generate animated SVGs.
-
-#### 5c-4. Naming & Download
-
-```bash
-# Static: {page/component}_{description}.svg|png
-# sidebar_logo.svg, dashboard_chart_placeholder.png
-
-# Animation: {page/component}_{description}_anim.svg
-# hero_intro_anim.svg, loading_spinner_anim.svg
-
-curl -s -o public/images/hero_intro_anim.svg \
-  "https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/xxx"
-```
-
-**Naming rules:**
-- Lowercase + underscores (snake_case)
-- Prefix with page/component for easy lookup
-- Animation suffix: `_anim.svg`
-- Never use Figma node IDs as filenames
-
-#### 5c-5. Generate ASSETS.md
-
-```markdown
-# Assets — {Project Name}
-
-> Auto-downloaded from Figma | {timestamp}
-> Total files: N
-
-| Filename | Node ID | Type | Format | Size | Animation | Purpose | Local path |
-|----------|---------|------|--------|------|-----------|---------|------------|
-| sidebar_logo.svg | 123:456 | image | SVG | 120x32 | — | Sidebar logo | public/images/sidebar_logo.svg |
-| hero_intro_anim.svg | 234:567 | animation | SVG | 800x400 | fadeIn 0.3s ease | Logo intro | public/images/hero_intro_anim.svg |
-```
-
-### 5d. Generate PLAN.md
-
-Break development into atomic, independently compilable tasks (15-45 min each).
-**Task descriptions use the user's language.**
-
-- Phase 1: Design system infrastructure (Token config → atomic components)
-- Phase 2: Layout & routing (Layout → page skeletons)
-- Phase 3: Pages & business logic (components → data connections)
-- Phase 4: Integration & testing (API → build verification)
-- Phase 5: Deployment readiness (env vars → CI/CD config)
-
----
-
-## Step 6 — Incremental Coding (CODE)
-
-**Input:** PLAN.md + SPEC.md + DESIGN.md + ASSETS.md
-**Output:** Complete project code
-**Status:** Wait for confirmation after each task
-
-Implement tasks from PLAN.md in order. After each task:
-1. Verify it compiles independently with no syntax errors
-2. Show a code summary or file structure diff
-3. Wait for user confirmation before the next task
-
-**Brownfield:** Only code new components/pages. Do not touch existing code.
-
-**Image references:** Always use local paths from ASSETS.md:
-
-```tsx
-// ✅ Correct: local asset
-import logo from '@/public/images/sidebar_logo.svg'
-<img src="/images/dashboard_chart.png" alt="Chart" />
-
-// ❌ Wrong: Figma CDN URL
-```
-
-**Animation references:** Same as images. Use `<img>` for auto-play,
-`<object>` for finer playback control:
-
-```tsx
-<img src="/images/hero_intro_anim.svg" alt="Intro animation" />
-<object data="/images/loading_spinner_anim.svg" type="image/svg+xml" />
-```
-
----
-
-## Step 7 — CI/CD & Deployment Config (DEPLOY)
-
-**Input:** Completed code + AGENTS.md (deployment plan)
-**Output:** Deployable app + `README.md`
-
-### 7a. Deployment Config
-
-**Greenfield:** Write config files per Step 3 decisions.
-**Brownfield:** Reuse existing config if present; create only if missing.
-
-### 7b. CI/CD Pipeline
-
-**GitHub Actions (recommended):**
-```yaml
-# .github/workflows/deploy.yml
-name: Deploy
-on:
-  push:
-    branches: [main]
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: npm ci
-      - run: npm run build
-```
-
-### 7c. Environment Variables
-
-Create `.env.example` with all required variables and descriptions.
-
-### 7d. Build Verification
-
-Run `npm run build` (or equivalent). Fix any build errors.
-
-### 7e. Generate Project README ⭐
-
-Create or update `README.md` at the project root. **Use the user's language.**
-
-**If README.md doesn't exist:**
-
-```markdown
-# {Project Name}
-
-This project was built with the [D2D](https://github.com/brickhu/d2d)
-workflow — Design to Deploy.
-
-## Local Development
-
-\```bash
-npm install
-npm run dev
-\```
-
-## Deployment
-
-{deployment instructions per Step 3 decisions}
-
----
-
-> Generated by [D2D](https://github.com/brickhu/d2d) - Design to Deploy
-```
-
-**If README.md already exists,** prepend:
-
-```markdown
-> This project was built with the [D2D](https://github.com/brickhu/d2d)
-> workflow — Design to Deploy.
-```
-
-Preserve all existing content. Append deployment instructions after existing
-local dev/deploy sections, or at the end if absent.
-
-### 7f. Deployment Summary
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  D2D Deployment Ready — {Project Name}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-✅ Build: Passed
-📦 Output: {dir}/dist or {dir}/.next
-📄 README: Generated/Updated
-
-📁 Assets:
-  • {N} images downloaded to {public/images/}
-  • Manifest: .d2d/ASSETS.md
-
-Deployment:
-  1. Connect Git repo to {platform}
-  2. Configure env vars in the platform dashboard
-  3. Push to main to trigger auto-deploy
-
-📁 Generated files:
-  • vercel.json / Dockerfile / wrangler.toml
-  • .github/workflows/deploy.yml
-  • .env.example
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
----
-
-# Workflow Overview & Mode Switching
-
-## Mode Detection
-
-| User input | Has `.d2d/STATE.md` | Has project files | Mode |
-|------------|---------------------|-------------------|------|
-| `/d2d <design>` | ❌ | ❌ | **Greenfield** — full 7 steps |
-| `/d2d <design>` | ❌ | ✅ | **Brownfield** — skip scaffold, adapt to existing |
-| `/d2d <design>` | ✅ | — | **Brownfield** — new design = context switch, backup `.d2d/` → regenerate |
-| `/d2d update [link]` | ✅ | — | **Update** — incremental diff |
-| `/d2d update` | ❌ | — | Prompt: run `/d2d <design>` first |
-| `/d2d restart [link]` | — | — | **Restart** — clear generated code, preserve scaffold, Greenfield from Step 1 |
-| `/d2d sync` | — | — | **Sync** — push style changes to Figma (write access required) |
+| `.d2c/STATE.md` | Workflow progress state machine | Steps 1-5 |
+| `.d2c/DESIGN.md` | Design Tokens + constraints (behavioral rules extracted from design variants/prototypes) + design source URL | Step 2 |
+| `styles/tokens.css` | CSS custom properties — **single source of truth for all visual values** (READ-ONLY — do not edit manually) | Step 2 |
+| `styles/tokens.ts` | TypeScript token exports (for JS runtimes) (READ-ONLY — do not edit manually) | Step 2 |
+| `AGENTS.md` | **Project context index (root)** — lightweight summary auto-detected by all AI coding tools; references `.d2c/` for details | Step 3 |
+| `.d2c/AGENTS.md` | Authoritative copy for D2C resume/reference | Step 3 (copy) |
+| `.d2c/SPEC.md` | Component tree, API contracts (schema-level), database schema, state patterns, directory structure, coding constraints + Token Adoption rules + testing strategy + error handling + a11y/security baselines | Step 4 |
+| `.d2c/ASSETS.md` | Image/animation asset manifest with local paths | Step 5 |
+| `PLAN.md` | Atomic development task list (code → test → deploy) | Step 5 |
+| **`.d2c/PLAYBOOK.md`** | **Execution roadmap — required env vars, implementation phases (code/test/deploy), step-by-step handoff guide** | **Step 5** |
+| `.d2c.bak/` | Backup of previous design's state (on context switch) | Auto |
+| `.d2c.restart.bak*/` | Pre-init backups, rotated | Auto (`/d2c init`) |
+
+> **Important:** `styles/tokens.css` and `styles/tokens.ts` are **single source of truth** files. Do not modify them manually — regenerate from Step 2 if tokens change.
 
 ## Resume Rules
 
-Resume applies to Greenfield and Brownfield only. Update runs as a single
-session — trigger `/d2d update` again for subsequent iterations.
+If the user chooses **update** (or `/d2c update` is triggered), resume from the
+step recorded in `.d2c/STATE.md`:
 
 | Current step | Resume behavior |
 |-------------|----------------|
 | Step 1 | Show diagnostic report again, request confirmation |
-| Step 2 | Show DESIGN.md summary, continue |
-| Step 3 | Continue incomplete tech Q&A (Brownfield: re-scan project) |
-| Step 4 | Regenerate or continue |
-| Step 5 | Reuse scaffold if exists; check downloaded assets |
-| Step 6 | Show progress, ask which task to continue from |
-| Step 7 | Check deployment config, continue from where left off |
+| Step 2 | Read `guides/STEP_2_TOKENS.md`, show DESIGN.md summary, continue |
+| Step 3 | Read guide, continue incomplete Q&A (re-run status script to detect any new project files) |
+| Step 4 | Read guide, regenerate or continue |
+| Step 5 | Read guide, reuse scaffold if exists; check downloaded assets |
+| Step 6 | Read guide, show progress, ask which task to continue from |
+| Step 7 | Read guide, check deployment config, continue |
 
----
+## Conflict Handling (surfaced in Step 1)
 
-# Important Notes
+Beyond what the status script detects (cache conflicts, context switch), Step 1
+also validates **design vs. project mismatch**: when the design type (iOS,
+Android, Web, Desktop) contradicts the detected project type (e.g., iOS design
+in a Next.js project). This is surfaced with four resolution options:
+
+| Option | Meaning |
+|--------|---------|
+| **Adapt the code to the design** | Restructure/reconfigure the project to match |
+| **Adapt the design to the project** | Implement the design's visual style within the existing platform |
+| **Proceed anyway, note the risk** | Flag as risk, user will handle manually |
+| **Cancel** | Abort D2C |
+
+See `guides/STEP_1_DIAGNOSIS.md` for the full detection table and output format.
+
+## AI Completion — Filling Design Gaps
+
+Design files naturally miss information that a full project needs. D2C uses an
+**AI-propose, user-confirm** pattern to fill these gaps:
+
+### What Design Covers vs. What Needs Completion
+
+| Covered by design | Needs AI Completion + User Confirmation |
+|------------------|----------------------------------------|
+| Colors, spacing, typography, radius | Environment variables (API keys, service URLs) |
+| Component layout and states | Backend services (auth provider, database) |
+| Form fields, table columns, detail views | **API contract schemas** (request/response body, status codes) |
+| Data entities (users, orders, products) | **Database schema** (field types, constraints, indexes, migrations) |
+| Loading spinners, empty illustrations, error toasts | **Component state patterns** (loading/empty/error for each dynamic component) |
+| Page structure and navigation | Testing framework (Vitest / Jest / Playwright) |
+| Visual interactions and animations | CI/CD pipeline choices |
+| Icon and image assets | Error monitoring and logging |
+| Breakpoint indications | Data fetching strategy (REST / GraphQL / tRPC) |
+| Modal/nav/dropdown UI patterns | **Accessibility rules** (focus trap, aria-current, aria-expanded) |
+| Auth forms, file upload, payment pages | **Security baselines** (CORS, CSP, bcrypt, CSRF) |
+| Content structure | State management library |
+
+### How AI Completion Works
+
+At each step where design data is insufficient, the Agent:
+
+1. **Detects the gap** — "The design shows a login form but provides no API
+   endpoint structure. The form implies username+password auth."
+2. **Proposes a default** — "Based on your Next.js stack, I recommend
+   NextAuth.js for authentication with credentials provider. This aligns with
+   server-side rendering and gives you session management out of the box."
+3. **Offers alternatives** — "Alternatives: Clerk (managed, faster setup) or
+   Lucia (lightweight, unopinionated)."
+4. **Asks for confirmation** — "Shall I proceed with NextAuth.js? Or prefer one
+   of the alternatives?"
+
+The user can accept the recommendation, choose an alternative, or provide their
+own answer. All confirmed decisions are recorded in the generated context files
+for traceability.
+
+This pattern applies to decisions surfaced in Step 3 (Architecture Q&A), Step 4
+(Testing strategy in SPEC), and Step 5 (Execution plan in PLAYBOOK).
+
+## Post-Context Guidance — The Playbook
+
+After Phase 1 completes, D2C generates `.d2c/PLAYBOOK.md` — the single document
+the user (or a Code Agent) references to execute the project. It contains:
+
+### Playbook Structure
+
+```markdown
+# Execution Playbook — {Project Name}
+
+## Prerequisites
+- Required environment variables (name, description, source, status)
+- External services to set up (auth, database, storage)
+- API keys or tokens to obtain
+
+## Execution Phases
+### Phase A — Implementation (via /d2c code)
+Priority-ordered task list from PLAN.md, organized by feature
+### Phase B — Testing (via /d2c test)
+Testing strategy: per-component unit tests, integration flows, E2E paths
+### Phase C — Deployment (via /d2c deploy)
+Platform setup, env vars in dashboard, CI/CD pipeline
+```
+
+The playbook replaces guesswork: the user knows exactly what to set up, in what
+order, and what each command will do.
 
 ## Safety & Constraints
+
 1. Ask user confirmation via AskUserQuestion before any filesystem operation
 2. Wait for user feedback after each step — never auto-advance
-3. Figma Token (REST API only) stays in the current session, not persisted
+3. Figma Token (REST API only) stays in the current session, never persisted
 4. Deployment configs never contain real secrets — only templates
-5. **Restart mode:** confirm each deletion; auto-backup `.d2d/` first
-6. **Design switch (Brownfield):** old `.d2d/` auto-backups to `.d2d.bak/`
-7. **Sync mode:** style properties only (colors, spacing, radius); no write
-   access or screenshot source = unsupported
+5. **Init:** confirm each deletion; auto-backup `.d2c/` first; rotate old backups; never delete user-authored code
+6. **Context switch** (new design with existing `.d2c/`): auto-backup old state to `.d2c.bak/` after user confirms
+7. **Sync mode:** style properties only (colors, spacing, radius); no write access or screenshot source = unsupported
+8. **Backups:** never delete a `.d2c.bak/` or `.d2c.restart.bak*/` without explicit user confirmation
+9. **Design-project mismatch:** never silently resolve; always present options to the user
+10. **Phase 2 (Execution):** never start Steps 6-7 unless the user triggers with `/d2c code`, `/d2c test`, or `/d2c deploy`
+11. **Playbook accuracy:** every env var and prerequisite in PLAYBOOK.md must be verifiable — flag uncertain ones with `[Pending: verify]`
+12. **Existing project supplement:** when enriching an existing project, never overwrite user-authored files; only append or create new context files
+13. **Context modification (`/d2c <natural language>`):** always show diff summary and confirm before writing. Never modify `tokens.css` or `tokens.ts` without explicit user confirmation. Preserve existing file structure — add within, never replace.
+
+## Data Flow
+
+```
+┌─ input ─────────────────────────────────────┐
+│  Figma URL / .fig / .sketch / image         │
+│  OR natural language ("use snake_case")     │
+└───────────┬───────────────────────────────---┘
+            ▼
+  ┌─ Is it a known command? (code/test/deploy/init/update/sync)
+  │   YES → standard dispatch
+  │
+  ├─ Is it a design input? (URL/file/screenshot)
+  │   YES → Layer 1: Figma MCP available?
+│             ├─ Yes → use MCP (zero config)
+│             └─ No  → run scripts/d2c-fetch.js <input>
+  │           ▼
+  │      normalized JSON → Phase 1 context generation
+  │
+  └─ Is it natural language + .d2c/STATE.md exists?
+      YES → Context modification mode
+            Read guides/CONTEXT_MODIFY.md
+            Intent analysis → AI-propose changes → confirm → write
+      
+  If none of the above → ask user for direction
+            ▼
+  ┌─────────────────────────────────────────────────────┐
+  │   Phase 1: Context Generation (Steps 1-5)           │
+  │                                                     │
+  │   Step 1 → STATE.md (diagnosis + conflicts)         │
+  │   Step 2 → DESIGN.md + tokens.css/ts ★              │
+  │   Step 3 → AGENTS.md (gap decisions)                │
+  │   Step 4 → SPEC.md (components + API contracts       │
+  │            + DB schema + states + a11y/security)     │
+  │            ★                                         │
+  │   Step 5 → ASSETS.md + PLAN.md + PLAYBOOK.md        │
+  │            + .env.example                            │
+  │                                                     │
+  │   Output: Full-stack system context covering        │
+  │   UI → API → Data → Infrastructure                  │
+  └─────────────────────────────────────────────────────┘
+            ▼ (user-triggered via /d2c code|test|deploy)
+  ┌─────────────────────────────────────────────────────┐
+  │   Phase 2: Execution (Steps 6-7, on demand)         │
+  │   /d2c code  → Step 6 (project code)                │
+  │   /d2c test  → Test generation                      │
+  │   /d2c deploy→ Step 7 (deployable app)              │
+  └─────────────────────────────────────────────────────┘
+            ▲
+            └── context modification at any point (/d2c <natural language>)
+                → updates SPEC.md / AGENTS.md / PLAYBOOK.md / DESIGN.md
+```
 
 ## Interaction Style
+
 - Present diagnostics as an architect's analysis report, not a form
-- Causal guidance: "Since your project needs {X}, I'd recommend {Y}. What do
-  you think?"
+- Frame every output in terms of how Code Agents will consume it: "This
+  DESIGN.md contains the spacing scale a Code Agent needs for consistent
+  layouts" or "These tokens in tokens.css are the single source of truth any
+  AI coding tool can reference"
+- Causal guidance: "Since your project already uses {X}, I'll build the context
+  around that. Does that work for you?"
+- When surfacing conflicts, present concrete options with trade-offs — don't ask
+  open-ended questions
 - Explain the reasoning behind every step
-- All output documents use the user's language; technical identifiers remain
-  in English
-- Save tech stack + language preferences to memory after Step 3 for future
-  sessions
-
-## Design Tool Data Access (Priority)
-
-```
-1️⃣ Figma MCP (preferred) — zero-config if installed
-2️⃣ Figma REST API (fallback) — requires Access Token
-3️⃣ Multimodal vision (last resort) — screenshot, no credentials
-```
-
-### Figma REST API Endpoints
-
-Option B only:
-- `GET https://api.figma.com/v1/files/{file_key}` — file metadata & nodes
-- `GET https://api.figma.com/v1/files/{file_key}/nodes?ids={ids}` — specific
-  nodes
-- `GET https://api.figma.com/v1/images/{file_key}?ids={ids}` — render/animated
-  SVG URLs (asset download)
-- `PUT https://api.figma.com/v1/files/{file_key}` — update node properties
-  (Sync feedback)
-- Token: https://www.figma.com/developers/api#access-tokens
-
-## Tech Stack & Language Memory
-
-After Step 3, save to memory:
-- Frontend framework preference
-- Styling solution preference
-- Backend / database preference
-- Deployment preference
-- Asset directory preference
-- Animation approach preference (native SVG / Framer Motion / GSAP, etc.)
-- **Language preference** (en / zh-CN / ja / etc.)
-
-Future D2D sessions auto-fill from memory.
-
+- After Phase 1 completes, present the full summary: "Context is ready covering
+  UI components, API contracts, database schema, state patterns, and deployment.
+  Here's what comes next: (A) Review the `.env.example` and set up env vars,
+  (B) run `/d2c code` to implement, (C) run `/d2c test` for tests, (D) run
+  `/d2c deploy` to deploy."
+  Ask the user which phase they want to start with.
+- When proposing AI completions (gap filling), always state the reasoning and
+  alternatives before asking for confirmation: "I recommend X because Y.
+  Alternatives: Z. Does X work?"
+- Save tech stack preferences to memory after Step 3 for future sessions
+- After Phase 1 is complete, note the new interaction modality: "You can also
+  refine or add to this context any time with `/d2c <your request>` — just
+  say what you want to change."

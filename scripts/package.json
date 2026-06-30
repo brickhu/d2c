@@ -1,0 +1,13 @@
+{
+  "name": "d2c-scripts",
+  "version": "1.0.0",
+  "description": "D2C helper scripts — design data fetching, project state detection",
+  "type": "module",
+  "dependencies": {
+    "kiwi-schema": "^1.0.0",
+    "unzipper": "^0.12.3"
+  },
+  "optionalDependencies": {
+    "@sketch-hq/sketch-file": "^4.0.0"
+  }
+}

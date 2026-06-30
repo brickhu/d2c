@@ -1,0 +1,28 @@
+{
+  "name": "skills",
+  "version": "0.1.0",
+  "description": "Install AI coding skills from npm or GitHub — npx skills add <package-or-repo>",
+  "type": "commonjs",
+  "bin": {
+    "skills": "./bin/skills.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brickhu/skills.git"
+  },
+  "keywords": [
+    "skills",
+    "ai-coding",
+    "skill-installer",
+    "trae",
+    "claude-code",
+    "cursor"
+  ],
+  "files": [
+    "bin/"
+  ]
+}

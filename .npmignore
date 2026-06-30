@@ -1,0 +1,14 @@
+# npm publish exclude
+.node-version
+.npmrc
+trae.iml
+tmp/
+*.log
+.DS_Store
+
+# Development / generated
+.d2c/
+.d2c.bak/
+.d2c.restart.bak*/
+node_modules/
+styles/
