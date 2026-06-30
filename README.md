@@ -9,7 +9,7 @@
   <a href="#readme">English</a> · <a href="README_cn.md">中文</a>
 </p>
 
-**D2C is not a code generator.** It is a **Design-to-Context translator** — extracting design tokens, full-stack architecture specs, API contracts, data models, component state patterns, and execution plans from visual design files. The output is structured context that any Code Agent (Claude Code, Cursor, Windsurf, or TRAE) consumes to generate design-aligned full-stack code.
+**D2C is a Design-to-Context workflow** — it translates visual design files into structured full-stack development context. Design tokens, API contracts, data models, component state patterns, and execution plans are extracted from your design and organized into context files that Code Agents (Claude Code, Cursor, Windsurf, or TRAE) consume to generate design-aligned full-stack code.
 
 ---
 

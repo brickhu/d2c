@@ -9,7 +9,7 @@
   <a href="README.md">English</a> · <a href="#readme">中文</a>
 </p>
 
-**D2C 不是代码生成器。** 它是**设计到上下文的翻译器**——从视觉设计文件中提取设计令牌、全栈架构规范、API 契约、数据模型、组件状态模式和执行计划。输出的是任何 Code Agent（Claude Code、Cursor、Windsurf 或 TRAE）都能消费的结构化上下文，用于生成与设计对齐的全栈代码。
+**D2C 是一个把设计稿转换为开发上下文的工作流**——从视觉设计文件中提取设计令牌、全栈架构规范、API 契约、数据模型、组件状态模式和执行计划，组织成 Code Agent（Claude Code、Cursor、Windsurf 或 TRAE）能消费的上下文文件，用于生成与设计对齐的全栈代码。
 
 ---
 
