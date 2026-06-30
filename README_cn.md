@@ -2,7 +2,6 @@
 
 > 将设计文件转换为结构化的全栈 AI 开发上下文。
 
-[![npm version](https://img.shields.io/npm/v/design2context)](https://www.npmjs.com/package/design2context)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 <p align="center">
