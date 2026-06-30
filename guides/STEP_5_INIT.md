@@ -290,7 +290,7 @@ Update `.d2c/STATE.md`, then present the PLAYBOOK.md summary to the user:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ✅ All context files generated:
-  • Design tokens   → styles/tokens.css + styles/tokens.ts
+  • Design tokens   → .d2c/DESIGN.md (documentation only)
   • Design spec     → .d2c/DESIGN.md
   • Project index   → AGENTS.md
   • Component spec  → .d2c/SPEC.md (UI tree + API contracts + DB schema + state patterns)

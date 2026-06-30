@@ -204,8 +204,7 @@ Detailed documents live in `.d2c/` and are referenced from here.
 - **Package manager:** {choice or detected}
 
 ## Design Tokens (MANDATORY)
-All visual values come from `styles/tokens.css` (CSS custom properties) or
-`styles/tokens.ts` (typed exports). **No hard-coded colors, spacing,
+All visual values come from `.d2c/DESIGN.md` — the single source of truth for design tokens. During code generation (Phase 2), the Agent will derive token declarations from DESIGN.md. **No hard-coded colors, spacing,
 font-sizes, radius, or shadows.** See `.d2c/DESIGN.md` for the full design
 system and behavioral constraints (component states, responsive rules,
 interaction patterns).

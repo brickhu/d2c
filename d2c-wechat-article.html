@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI编程，设计稿就是最好的上下文。</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f5f2;
+    --surface: #ffffff;
+    --text: #1a1a1a;
+    --text-secondary: #666;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --border: #e5e5e5;
+    --highlight: #fef3c7;
+    --quote-border: #2563eb;
+    --radius: 12px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans SC', -apple-system, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  /* Hero */
+  .hero {
+    padding: 80px 0 48px;
+    text-align: center;
+    background: linear-gradient(135deg, #f7f5f2 0%, #e8f0fe 100%);
+  }
+  .hero .container {
+    max-width: 800px;
+  }
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 900;
+    line-height: 1.3;
+    letter-spacing: -0.5px;
+    margin-bottom: 16px;
+  }
+  .hero h1 .highlight {
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero .subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+  .hero .meta {
+    margin-top: 16px;
+    font-size: 13px;
+    color: #999;
+  }
+  /* Article body */
+  article {
+    padding: 40px 0 60px;
+  }
+  article .container {
+    background: var(--surface);
+    padding: 48px 40px;
+    border-radius: var(--radius);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  p {
+    font-size: 16px;
+    margin-bottom: 1.6em;
+    text-align: justify;
+  }
+  /* Blockquote */
+  blockquote {
+    margin: 32px 0;
+    padding: 20px 24px;
+    background: #f8faff;
+    border-left: 4px solid var(--quote-border);
+    border-radius: 0 8px 8px 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #1a2a4a;
+    line-height: 1.7;
+  }
+  blockquote .source {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-secondary);
+  }
+  /* Callout box */
+  .callout {
+    margin: 32px 0;
+    padding: 24px;
+    background: var(--accent-soft);
+    border-radius: var(--radius);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .callout strong {
+    color: var(--accent);
+  }
+  /* Highlight box */
+  .insight-box {
+    margin: 32px 0;
+    padding: 28px 32px;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border-radius: var(--radius);
+    text-align: center;
+  }
+  .insight-box h3 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #92400e;
+  }
+  .insight-box p {
+    font-size: 15px;
+    color: #78350f;
+    margin-bottom: 0;
+    text-align: center;
+  }
+  /* Section header */
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 48px 0 20px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+    letter-spacing: -0.3px;
+  }
+  h3 {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 24px 0 12px;
+  }
+  /* List */
+  ul {
+    margin: 0 0 1.6em 20px;
+    list-style: none;
+  }
+  ul li {
+    font-size: 15px;
+    margin-bottom: 12px;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.7;
+  }
+  ul li::before {
+    content: "▸";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  /* Code */
+  code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 14px;
+    background: #f0f0f0;
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: #d63384;
+  }
+  /* Command block */
+  .cmd-block {
+    margin: 24px 0;
+    padding: 16px 20px;
+    background: #1a1a2e;
+    border-radius: 8px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 15px;
+    color: #a5f3fc;
+    overflow-x: auto;
+  }
+  .cmd-block .prompt { color: #6ee7b7; }
+  .cmd-block .comment { color: #6b7280; font-style: italic; }
+  /* Divider */
+  .divider {
+    text-align: center;
+    margin: 40px 0;
+    color: #ccc;
+    font-size: 20px;
+    letter-spacing: 8px;
+  }
+  /* Tag */
+  .tag {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 4px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    margin-right: 6px;
+  }
+  /* Strong emphasis */
+  strong {
+    font-weight: 600;
+  }
+  /* Footer */
+  .article-footer {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-align: center;
+  }
+  .article-footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .article-footer a:hover {
+    text-decoration: underline;
+  }
+  /* Responsive */
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 26px; }
+    article .container { padding: 28px 20px; }
+    p { font-size: 15px; }
+    blockquote { padding: 16px 18px; font-size: 15px; }
+    .insight-box { padding: 20px; }
+    .insight-box h3 { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<header class="hero">
+  <div class="container">
+    <h1>AI编程，<span class="highlight">设计稿</span>就是最好的上下文</h1>
+    <p class="subtitle">从"AI味"到"设计味"，差的不只是提示词</p>
+    <p class="meta">fei · 2026</p>
+  </div>
+</header>
+
+<!-- Article -->
+<article>
+  <div class="container">
+
+    <p>别看很多 AI 营销号展示的 AI 成品有多么惊艳——那只是一个 Demo。等你自己真要通过 AI 来构建一个可以上线的产品时，你发现这里面的鸿沟太深了。提示词写到手软，AI 生成的结果依然差强人意。</p>
+
+    <p>这个问题我反复碰壁了好几次，总结下来有三道过不去的坎——</p>
+
+    <p><strong>第一，Agent 的本质是上下文工程。</strong>大模型再强，提示词不到位它就是智障。可问题是，<strong>普通人怎样才能写出涵盖项目全貌的提示词？</strong>你不是不想写，是你根本不知道从哪写起。</p>
+
+    <p><strong>第二，现在的 Design to Code，本质上还是前端切图。</strong>生成的代码只是一堆"浮于表面"的前端 Demo。那数据库怎么建？API 如何定义？权限怎么控制？没有人替你操心——<strong>你拿到手的还是一座孤岛。</strong></p>
+
+    <p><strong>第三，让 AI 直接做设计，在缺乏约束的情况下，生成的结果千篇一律。</strong>没有设计规范、没有视觉约束、没有品牌调性——AI 产出的就是那种"说不上哪不对，但一看就是 AI 做的"东西。<strong>一股 AI 味。</strong></p>
+
+    <p>尝试了好几个 AI 开发的全栈项目，最后发现 AI 的确帮你做了 80% 的工作——但往往就是最后的 20%，把你卡得死死的。</p>
+
+    <div class="divider">· · ·</div>
+
+    <h2>换个思路：设计就是最好的上下文</h2>
+
+    <p>上面这三个痛点，指向同一个结论：<strong>我们缺的不是更聪明的 AI，而是一个让设计稿和 AI 编码工具之间的"翻译层"。</strong></p>
+
+    <p>这个翻译层不需要重新发明什么东西。因为你已经有了最好的上下文来源——<strong>设计稿本身。</strong></p>
+
+    <p>仔细想想，一份设计稿里天然包含了什么？</p>
+
+    <ul>
+      <li><strong>视觉规范</strong> — 颜色、间距、字号层级、圆角、阴影。不是你在提示词里手写的数字，而是设计师反复推敲过的系统。</li>
+      <li><strong>交互流程</strong> — 页面跳转关系、弹窗触发条件、状态变化（空态、加载态、错误态）。设计稿里的每个连线都对应一段业务逻辑。</li>
+      <li><strong>信息架构</strong> — 什么数据在哪个位置展示？卡片里有哪些字段？列表的排序规则是什么？设计稿天然回答了这些问题。</li>
+      <li><strong>业务约束</strong> — 用户能做什么、不能做什么、什么情况下看到什么内容。这些"隐性知识"全都编在页面的布局和逻辑里。</li>
+    </ul>
+
+    <blockquote>
+      设计稿从来不只是"界面长什么样"——它是产品的完整上下文，只是之前只有设计师能读懂它。
+    </blockquote>
+
+    <p>大模型天生擅长"看懂"视觉内容。它可以从设计图中准确识别组件、颜色层级、文字内容，甚至可以推测出页面之间的流转关系。但问题在于：<strong>没有人把这些信息组织成 AI 编码工具可以直接消费的格式。</strong></p>
+
+    <p>这就是 Design2Context（简称 D2C）要解决的问题。</p>
+
+    <h2>两种范式：你选哪条路？</h2>
+
+    <p>到这里，其实浮现出两种截然不同的开发范式。对比一下，路径差异一目了然：</p>
+
+    <p><strong>范式一：传统 AI 编程模式</strong></p>
+
+    <p>拿到设计稿 → 凭经验和直觉写提示词（"帮我实现这个页面，颜色用蓝色，宽高大概这样"）→ AI 生成一堆前端组件 → 再写提示词让 AI 搭后端 API → 手动联调前端后端的接口 → 发现跟设计稿差距太大 → 反反复复改提示词。</p>
+
+    <p>这个链条里，<strong>设计稿只在第一环被"看了一眼"</strong>，之后就被丢到一边。AI 后面的所有生成，都依赖你手写的那几句提示词——而提示词天生是模糊的、片面的、容易遗漏细节的。</p>
+
+    <p>结果就是：前端有 AI 味，后端跟前端对不上，中间联调工作量比生成代码还大。</p>
+
+    <p><strong>范式二：Design2Context 模式</strong></p>
+
+    <p>设计稿完成 → 交给 D2C 提取完整上下文（视觉规范、交互流程、信息架构、业务约束）→ AI 编码工具在这个"底座"上直接生成代码。</p>
+
+    <p>这个模式的核心区别在于：<strong>设计先行。</strong>设计稿不仅仅是"界面参考图"，而是产品的完整语义层。一旦设计图被解析完成，AI 已经掌握了整个业务的全貌——前端的 UI 层级、页面的流转关系、每个区域展示什么数据、用户处于什么状态能看到什么。</p>
+
+    <p>在这个底座上，代码生成不再是"猜"，而是"填空"。</p>
+
+    <div style="margin: 32px 0; overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 14px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+        <thead>
+          <tr style="background: #1a1a2e; color: #fff;">
+            <th style="padding: 12px 16px; text-align: left; width: 25%;"></th>
+            <th style="padding: 12px 16px; text-align: left; background: #2d2d44;">传统 AI 编程</th>
+            <th style="padding: 12px 16px; text-align: left; background: #1e3a5f;">D2C 范式</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background: #fafafa;">
+            <td style="padding: 12px 16px; border-bottom: 1px solid #eee; font-weight: 600;">信息入口</td>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #eee;">手写提示词（模糊、片面）</td>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #eee; background: #f0f7ff;">设计稿原文（完整、精确）</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #eee; font-weight: 600;">AI 理解范围</td>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #eee;">提示词覆盖的局部</td>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #eee; background: #f0f7ff;">业务全貌（UI + 交互 + 数据 + 权限）</td>
+          </tr>
+          <tr style="background: #fafafa;">
+            <td style="padding: 12px 16px; border-bottom: 1px solid #eee; font-weight: 600;">前后端对齐</td>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #eee;">人工联调，反复修改</td>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #eee; background: #f0f7ff;">上下文一次性对齐，自动一致</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #eee; font-weight: 600;">前端效果</td>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #eee;">"AI 味"—默认色板、靠猜的间距</td>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #eee; background: #f0f7ff;">"设计味"—跟设计稿像素级对齐</td>
+          </tr>
+          <tr style="background: #fafafa;">
+            <td style="padding: 12px 16px; font-weight: 600;">技术决策</td>
+            <td style="padding: 12px 16px;">开发者在提示词里拍脑袋</td>
+            <td style="padding: 12px 16px; background: #f0f7ff;">AI 基于业务复杂度推荐，人确认</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>说白了，范式一把设计稿当"参考图"，范式二把设计稿当"源代码"。<strong>前者让 AI 猜你要什么，后者让 AI 知道你要什么。</strong></p>
+
+    <p>用一个更直白的比喻：<strong>Design2Context 就像在设计完成后，请了一位全栈架构师。</strong>它根据设计图把前后端架构全部梳理清楚——前端怎么分层、后端怎么拆模块、API 怎么定义、数据怎么存、权限怎么控制——然后把这份完整的架构蓝图交给 AI 编码工具去开发。</p>
+
+    <p>这样一来，代码生成就像是在已经设计好的地基上盖房子，每一块砖放哪都有据可依。</p>
+
+    <p>而传统 AI 编程呢？相当于让 AI 同时扮演设计师和施工队——没有蓝图，直接上手砌墙。设计（提示词）和架构（技术决策）从一开始就是脱节的。砌到一半发现不对，拆了重来，再砌，再拆。</p>
+
+    <p><strong>一个是"先架构，后编码"，一个是"边编码，边想架构"。</strong>前者走的是直线，后者走的是折线——看上去都在动，路径长度完全不同。</p>
+
+    <h2>不是又一个 Design to Code，而是一个"翻译层"</h2>
+
+    <p>D2C 的核心思路很简单：<strong>不直接把设计转成代码，而是把设计转成 AI 编码工具能读懂的结构化上下文。</strong></p>
+
+    <p>这个区别至关重要。代码生成是第二步，而且交给专门的 AI 编码工具去完成——Cursor 和 Claude Code 在代码生成上的能力已经是天花板了，不需要再造一个轮子。D2C 做的事是给这些工具"喂"它最需要的东西：<strong>完整、准确、结构化的上下文。</strong></p>
+
+    <p>具体来说，一份 Figma 设计稿经过 D2C 的处理，会输出什么？</p>
+
+    <ul>
+      <li><strong>设计令牌（Design Tokens）</strong> — 提取为 <code>tokens.css</code> 和 <code>tokens.ts</code>，Code Agent 直接引用，从此告别魔法数字</li>
+      <li><strong>组件树</strong> — 设计稿里的每个组件被识别、命名、标注属性，AI 知道它在页面里的层级和角色</li>
+      <li><strong>页面结构和路由</strong> — 设计稿中的页面及其跳转关系被映射为应用路由</li>
+      <li><strong>API 契约</strong> — AI 基于页面展示的数据推测接口结构，你确认后写入上下文</li>
+      <li><strong>数据库 Schema</strong> — 根据展示的字段和数据关系，推断表结构</li>
+      <li><strong>鉴权策略</strong> — 页面里的"登录后才可见"区域，被识别为权限控制点</li>
+      <li><strong>状态管理模式</strong> — 根据交互复杂度推荐合适的状态管理方案</li>
+    </ul>
+
+    <p>所有输出都被整理成标准格式，Cursor、Claude Code、Windsurf、TRAE 等主流 AI 编码工具可以直接读取。</p>
+
+    <p>最终的效果是：<strong>你给 AI 一个 Figma 链接，它现在能看懂的不只是颜色和字号，还有 API 该怎么设计、数据库该怎么建、权限该怎么控制。</strong></p>
+
+    <div class="insight-box">
+      <h3>D2C 的核心观点</h3>
+      <p>设计转代码这条路的瓶颈从来不是"能不能生成代码"，而是"生成代码之前，AI 有没有真的理解这个设计"。</p>
+    </div>
+
+    <h2>一句话开始用</h2>
+
+    <p>安装只需要一条命令：</p>
+
+    <div class="cmd-block">
+      <span class="prompt">$</span> npx skills add design2context
+    </div>
+
+    <p>然后在你的项目里：</p>
+
+    <div class="cmd-block">
+      <span class="prompt">$</span> /d2c &lt;Figma 设计稿链接或截图&gt;
+      <span class="comment"># 5 步生成完整上下文文件</span><br>
+      <span class="prompt">$</span> /d2c code
+      <span class="comment"># 让 Code Agent 基于上下文生成全栈代码</span>
+    </div>
+
+    <p>你可以把 D2C 理解成一个"前置大脑"——它不抢 Cursor 和 Claude Code 的活，它让它们干得更好。</p>
+
+    <p>如果一个 AI 编码工具花 10 分钟思考"这个设计到底是什么意思"，剩下的 50 分钟才真正写代码——那它就是浪费了你 10 分钟。D2C 把前面 10 分钟压缩成了 5 秒，把完整的上下文直接递到 AI 手里。</p>
+
+    <div class="divider">· · ·</div>
+
+    <p>人们对 AI 编码有一个普遍的误解：以为"AI 能写代码" = "任何需求扔进去就行"。实际上，AI 写出的代码质量遵循一条简单的规律：<strong>进什么，出什么。</strong></p>
+
+    <p>设计稿是你手上最完整的产品上下文。它包含了视觉细节、交互逻辑、信息架构、业务约束——这些正式 AI 编码工具最需要但最缺乏的东西。</p>
+
+    <p>D2C 不做代码生成。它做的是把设计稿"翻译"给 AI 听。而一旦 AI 真正听懂了你的设计，写代码这件事，反而是它最擅长的那部分。</p>
+
+    <p style="margin-top: 32px; font-weight: 500;">
+      项目地址：<a href="https://github.com/brickhu/d2c" target="_blank" style="color: #2563eb;">github.com/brickhu/d2c</a>
+    </p>
+
+    <div class="article-footer">
+      <p>© 2026 fei · 转载请联系作者</p>
+    </div>
+
+  </div>
+</article>
+
+</body>
+</html>

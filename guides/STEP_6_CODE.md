@@ -4,7 +4,7 @@
 > 
 > **Note:** This step is NOT part of the core D2C workflow. Steps 1-5 produce the full AI context. Code generation is triggered explicitly by the user via `/d2c code`. See the execution roadmap in `.d2c/PLAYBOOK.md` for implementation phases and dependencies.
 
-**Input:** PLAN.md + SPEC.md + AGENTS.md + DESIGN.md + tokens.css + ASSETS.md
+**Input:** PLAN.md + SPEC.md + AGENTS.md + DESIGN.md + ASSETS.md
 **Output:** Incrementally compilable project code
 
 ## 6a. Code Generation Process
@@ -25,13 +25,9 @@ progress and request confirmation after each task.
 
 Before writing the first line of code:
 
-1. **Confirm token files exist** (`styles/tokens.css` and/or `styles/tokens.ts`
-   from Step 2). If they don't, stop and regenerate from Step 2 — **no code
-   should be written without tokens in place.**
-2. **Re-read token files** at the start of every session to keep their values
-   in context.
-3. **Confirm Tailwind config** (if applicable) extends from `tokens.css`
-   values, not hard-coded numbers.
+1. **Read DESIGN.md** to understand the token system — the single source of truth.
+2. **Derive token declarations** from DESIGN.md into `styles/tokens.css` and/or `styles/tokens.ts` at the start of code generation (if the target framework uses CSS/JS tokens).
+3. **Confirm Tailwind config** (if applicable) extends from the generated `tokens.css`.
 
 ## 6c. Token Adoption Rules (MANDATORY)
 
@@ -44,7 +40,7 @@ defined in `guides/STEP_4_SPEC.md` section 4d. Summary of hard rules:
 | 2 | **Zero px/rem literals** for spacing, font-size, radius | Check style properties use `var(--spacing-*)`, `var(--font-size-*)`, `var(--radius-*)` or TS token imports |
 | 3 | **Typography must use tokens** | font-family, font-weight, line-height must reference tokens |
 | 4 | **Shadows must use tokens** | box-shadow must reference `var(--shadow-*)` or `tokens.shadows.*` |
-| 5 | **Token files are READ-ONLY** | Never modify `styles/tokens.css` or `styles/tokens.ts` during coding |
+| 5 | **Token source is DESIGN.md** | Never modify `tokens.css` or `tokens.ts` directly — always edit `.d2c/DESIGN.md` and re-derive |
 
 ## 6d. Token Fidelity Check (Post-Generation Gate)
 
@@ -58,7 +54,7 @@ Step 2: Scan for literal violations:
   - px/rem literals in style/className properties
   - Any color/spacing/size value that could be a token
 Step 3: For each violation found:
-  - If token equivalent exists in tokens.css/tokens.ts → REPLACE WITH TOKEN REFERENCE
+  - If token equivalent exists in DESIGN.md → REPLACE WITH TOKEN REFERENCE
   - If NOT an exception (see 4d) → FIX BEFORE PROCEEDING
   - If an exception → ADD CODE COMMENT explaining why
 Step 4: Only after zero violations → mark task complete
@@ -116,7 +112,7 @@ After each task compiles successfully:
 When coding into an existing project:
 
 - Match existing file naming, import patterns, and directory layout
-- Import and extend the existing `tokens.css` (it was added in Step 2)
+- Import and extend the generated `tokens.css` (derived from DESIGN.md)
 - If an existing component already exists for the same purpose, reuse it and
   apply token-driven styling rather than rewriting
 - Append to existing files rather than creating parallel structures
@@ -127,4 +123,4 @@ Update `.d2c/STATE.md` to mark each task complete.
 
 **Wait for user decision.** The user can either:
 - **(a)** Proceed to optional code generation by continuing with the PLAN.md tasks, or
-- **(b)** Stop here — the context files (`.d2c/DESIGN.md`, `.d2c/SPEC.md`, `.d2c/AGENTS.md`, `.d2c/PLAN.md`, `styles/tokens.css`, `styles/tokens.ts`) are complete and ready for any Code Agent to consume.
+- **(b)** Stop here — the context files (`.d2c/DESIGN.md`, `.d2c/SPEC.md`, `.d2c/AGENTS.md`, `.d2c/PLAN.md`, and derived code files) are complete and ready for any Code Agent to consume.

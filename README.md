@@ -90,9 +90,7 @@ After processing a design, D2C produces these context files in your project:
 
 | File | What it contains |
 |------|-----------------|
-| `.d2c/DESIGN.md` | Design tokens + behavioral constraints + design URL |
-| `styles/tokens.css` | CSS custom properties — single source of truth for all visual values |
-| `styles/tokens.ts` | TypeScript token exports for JS runtimes |
+| `.d2c/DESIGN.md` | Design tokens + behavioral constraints + responsive breakpoints + design URL. Documentation only. |
 | `.d2c/AGENTS.md` | Project context index — tech stack, key decisions, constraints |
 | `.d2c/SPEC.md` | Component tree, API contracts, DB schema, state patterns, testing strategy, a11y/security |
 | `.d2c/ASSETS.md` | Image & animation asset manifest with local paths |
@@ -131,7 +129,7 @@ Input: Figma URL / .fig / image / natural language
   │  Phase 1: Context Generation (always runs)    │
   │                                               │
   │  Step 1 → STATE.md (diagnosis + conflicts)    │
-  │  Step 2 → DESIGN.md + tokens.css/ts           │
+  │  Step 2 → DESIGN.md (design tokens + constraints)           │
   │  Step 3 → AGENTS.md (architecture decisions)   │
   │  Step 4 → SPEC.md (components + API + DB +    │
   │            states + a11y + security)            │
@@ -174,7 +172,7 @@ cd ~/Projects/dashboard-app
 
 # ── 4. Go through 5 guided steps (AI asks, you answer) ──
 # Step 1: Project survey → diagnosis report
-# Step 2: Token extraction → DESIGN.md + tokens.css + tokens.ts
+# Step 2: Token extraction → DESIGN.md (documentation only)
 # Step 3: Architecture Q&A (full-stack) → AGENTS.md
 # Step 4: Component tree + API contracts + DB schema → SPEC.md
 # Step 5: Assets + PLAN.md + PLAYBOOK.md + .env.example

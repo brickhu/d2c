@@ -328,15 +328,13 @@ OrderItem:
 | **Naming** | PascalCase for components, camelCase for utils, kebab-case for dirs |
 | **Imports** | Absolute imports preferred (`@/components/ui/Button`) — align with existing `tsconfig.json` paths if project exists |
 | **Components** | One file per component, named export + default export, Props interface at top |
-| **Style** | **ZERO hard-coded values.** Every color, font-size, spacing, radius, and shadow MUST reference a token from `styles/tokens.css` (CSS custom property) or `styles/tokens.ts` (JS export). See Token Adoption rules below. |
+| **Style** | **ZERO hard-coded values.** Every color, font-size, spacing, radius, and shadow MUST reference a token from `.d2c/DESIGN.md` (the token source of truth). See Token Adoption rules below. |
 | **Quality** | TypeScript strict (if TS is used), max 200 lines per component, logic in hooks/lib not in components, input validation required |
 | **Existing conventions** | If project exists, match existing patterns (file naming, export style, folder depth) |
 
 ## 4d. Token Adoption — Mandatory Rules
 
-`styles/tokens.css` and `styles/tokens.ts` are generated in **Step 2** and are
-the **single source of truth** for all visual properties extracted from the
-design. Every component generated in Steps 5-7 MUST use tokens exclusively.
+`.d2c/DESIGN.md` is generated in **Step 2** and is the **single source of truth** for all visual design tokens. The Agent MUST read this file at the start of code generation to know what values are available. During code generation, the Agent derives `tokens.css` / `tokens.ts` from DESIGN.md as needed.
 
 ### Hard rules (never violate):
 
@@ -346,7 +344,7 @@ design. Every component generated in Steps 5-7 MUST use tokens exclusively.
 | 2 | **Zero px/rem literals for spacing, font-size, radius.** Every value must use `var(--spacing-*)`, `var(--font-size-*)`, `var(--radius-*)` or their TS equivalents | Ensures spacing rhythm is consistent with the design |
 | 3 | **Typography must use tokens.** `font-family` → `var(--font-family-sans)`, `font-weight` → `var(--font-weight-*)`, `line-height` → `var(--line-height-*)` | Without this, text renders differently than designed |
 | 4 | **Shadows must use tokens.** `box-shadow` → `var(--shadow-*)` | Shadow values are subtle; hard-coding mistranslates them |
-| 5 | **Existing token files are READ-ONLY.** Never modify `styles/tokens.css` or `styles/tokens.ts` during code generation. If a value is missing, add it as a new token in DESIGN.md and regenerate. | Modifying token files per-component leads to token drift |
+| 5 | **Existing token files are READ-ONLY.** Never modify `styles/tokens.css` or `styles/tokens.ts` during code generation. If a value is missing, add it as a new token in `.d2c/DESIGN.md`; re-derived token files will pick it up. | Modifying token files per-component leads to token drift |
 | 6 | **Every generated component file must be scanned for literal violations before being marked as complete.** | Automated post-generation check |
 
 ### Allowed exceptions (must be confirmed with user):
@@ -354,7 +352,7 @@ design. Every component generated in Steps 5-7 MUST use tokens exclusively.
 - **Third-party library overrides** (e.g., a chart library that requires specific
   color formats). Always add a code comment explaining why.
 - **Semantic exceptions** (e.g., a brand-required color that doesn't exist in the
-  design). Add a new token to `styles/tokens.css` rather than hard-coding.
+  design). Add a new token to `.d2c/DESIGN.md` rather than hard-coding.
 - **Custom animations** involving `@keyframes` with specific color/position values
   can use literals inside `@keyframes` blocks, but the property values that
   reference them must be token-based.

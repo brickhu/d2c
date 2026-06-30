@@ -71,7 +71,7 @@ Use this guide for routing:
 | "Add a11y rule" | `SPEC.md` §4g (Accessibility) |
 | "Change DB/ORM" | `SPEC.md` §4b5 (DB Schema) + `AGENTS.md` |
 | "Add state pattern" | `SPEC.md` §4b4 (State Patterns) |
-| "Change token value" | `DESIGN.md` + `tokens.css` + `tokens.ts` |
+| "Change token value" | `.d2c/DESIGN.md` (regenerate derived files if needed) |
 | "Add testing rule" | `SPEC.md` §4e (Testing Strategy) + `PLAYBOOK.md` |
 | "Reference external doc" | `AGENTS.md` (lift to root for visibility) |
 | "General constraint" | `AGENTS.md` + cross-reference to affected file |
@@ -175,7 +175,7 @@ After applying changes, verify:
    updated?
 3. **PLAYBOOK.md aligned** — if SPEC testing strategy changed, does PLAYBOOK
    testing section match?
-4. **Token files intact** — DESIGN.md / tokens.css / tokens.ts were not
+4. **Token source intact** — DESIGN.md was not
    accidentally modified (these are token-only files)
 
 ## After Completion

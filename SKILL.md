@@ -1,6 +1,6 @@
 ---
 name: "d2c"
-description: "Design2Context (D2C) — A design-to-AI-context workflow. Converts design files (Figma, image) into structured, full-stack system context covering frontend, backend, data, and infrastructure for Code Agents (Claude Code, Cursor, Windsurf, etc.). Produces DESIGN.md (tokens + constraints), AGENTS.md, SPEC.md, PLAN.md, ASSETS.md, and runtime token files (styles/tokens.css + styles/tokens.ts). Code generation is optional, triggered by user command at the end. Input: design link or screenshot → Output: context files for AI coding agents."
+description: "Design2Context (D2C) — A design-to-AI-context workflow. Converts design files (Figma, image) into structured, full-stack system context covering frontend, backend, data, and infrastructure for Code Agents (Claude Code, Cursor, Windsurf, etc.). Produces DESIGN.md (tokens + constraints), AGENTS.md, SPEC.md, PLAN.md, ASSETS.md, and PLAYBOOK.md. Phase 1 produces documentation only — no code files. Code generation is optional, triggered by user command at the end. Input: design link or screenshot → Output: context files for AI coding agents."
 
 run_condition: "
   User provides a design link (Figma, Penpot, etc.), a design screenshot, or
@@ -35,10 +35,12 @@ files** — not code. Code Agents consume these context files to produce
 consistent, token-adherent full-stack implementations.
 
 Your workflow is a **two-phase state machine**. Phase 1 (Core, Steps 1-5)
-generates context and **always runs**. Phase 2 (Steps 6-7) is code generation
-and deployment — **only triggered by the user**. Each step must wait for user
-confirmation before moving to the next. Progress is persisted in
-`.d2c/STATE.md` at the project root. All generated documents are in English.
+generates context and **always runs**. **Phase 1 produces documentation only —
+no code files.** Everything token-related stays in DESIGN.md as structured
+documentation. Phase 2 (Steps 6-7) is code generation and deployment —
+**only triggered by the user**. Each step must wait for user confirmation
+before moving to the next. Progress is persisted in `.d2c/STATE.md` at the
+project root. All generated documents are in English.
 
 ## Status Script (deterministic state detection)
 
@@ -195,7 +197,7 @@ Each step has a detailed execution guide in the `guides/` directory.
 | Step | Name | Key Output | Guide |
 |------|------|-----------|-------|
 | **1** | Project Survey & Diagnosis | Diagnostic report (chat) + conflict resolution + `.d2c/STATE.md` | `guides/STEP_1_DIAGNOSIS.md` |
-| **2** | Extract Design Tokens | `.d2c/DESIGN.md` (tokens + behavioral constraints) + `styles/tokens.css` + `styles/tokens.ts` (runtime config, single source of truth) ★ | `guides/STEP_2_TOKENS.md` |
+| **2** | Extract Design Tokens | `.d2c/DESIGN.md` (tokens + constraints + responsive breakpoints — documentation only, no code files) ★ | `guides/STEP_2_TOKENS.md` |
 | **3** | Architecture Alignment | `AGENTS.md` (root) + `.d2c/AGENTS.md` (copy for D2C resume) — lightweight project context index + gap decisions (AI-proposed + user-confirmed) | `guides/STEP_3_ARCHITECTURE.md` |
 | **4** | Coding Standards & Component Mapping | `.d2c/SPEC.md` (directory structure, component tree, constraints, testing strategy) ★ | `guides/STEP_4_SPEC.md` |
 | **5** | Init, Assets & Plan | Scaffold (if needed) + downloaded assets + `.d2c/ASSETS.md` + `PLAN.md` + **`.d2c/PLAYBOOK.md`** (execution roadmap covering code → test → deploy) | `guides/STEP_5_INIT.md` |
@@ -226,10 +228,8 @@ When the user triggers Phase 2:
 | File | Purpose | Created by |
 |------|---------|------------|
 | `.d2c/STATE.md` | Workflow progress state machine | Steps 1-5 |
-| `.d2c/DESIGN.md` | Design Tokens + constraints (behavioral rules extracted from design variants/prototypes) + design source URL | Step 2 |
-| `styles/tokens.css` | CSS custom properties — **single source of truth for all visual values** (READ-ONLY — do not edit manually) | Step 2 |
-| `styles/tokens.ts` | TypeScript token exports (for JS runtimes) (READ-ONLY — do not edit manually) | Step 2 |
-| `AGENTS.md` | **Project context index (root)** — lightweight summary auto-detected by all AI coding tools; references `.d2c/` for details | Step 3 |
+| `.d2c/DESIGN.md` | Design Tokens + constraints (behavioral rules, responsive breakpoints, component states) + design source URL. **Documentation only — single source of truth for all visual values.** | Step 2 |
+| `AGENTS.md` | **Project context index (root)** — lightweight summary auto-detected by all AI coding tools; references `.d2c/` for details. Includes responsive design strategy for web projects. | Step 3 |
 | `.d2c/AGENTS.md` | Authoritative copy for D2C resume/reference | Step 3 (copy) |
 | `.d2c/SPEC.md` | Component tree, API contracts (schema-level), database schema, state patterns, directory structure, coding constraints + Token Adoption rules + testing strategy + error handling + a11y/security baselines | Step 4 |
 | `.d2c/ASSETS.md` | Image/animation asset manifest with local paths | Step 5 |
@@ -237,8 +237,6 @@ When the user triggers Phase 2:
 | **`.d2c/PLAYBOOK.md`** | **Execution roadmap — required env vars, implementation phases (code/test/deploy), step-by-step handoff guide** | **Step 5** |
 | `.d2c.bak/` | Backup of previous design's state (on context switch) | Auto |
 | `.d2c.restart.bak*/` | Pre-init backups, rotated | Auto (`/d2c init`) |
-
-> **Important:** `styles/tokens.css` and `styles/tokens.ts` are **single source of truth** files. Do not modify them manually — regenerate from Step 2 if tokens change.
 
 ## Resume Rules
 
@@ -355,7 +353,7 @@ order, and what each command will do.
 10. **Phase 2 (Execution):** never start Steps 6-7 unless the user triggers with `/d2c code`, `/d2c test`, or `/d2c deploy`
 11. **Playbook accuracy:** every env var and prerequisite in PLAYBOOK.md must be verifiable — flag uncertain ones with `[Pending: verify]`
 12. **Existing project supplement:** when enriching an existing project, never overwrite user-authored files; only append or create new context files
-13. **Context modification (`/d2c <natural language>`):** always show diff summary and confirm before writing. Never modify `tokens.css` or `tokens.ts` without explicit user confirmation. Preserve existing file structure — add within, never replace.
+13. **Context modification (`/d2c <natural language>`):** always show diff summary and confirm before writing. Never modify DESIGN.md token values without explicit user confirmation. Preserve existing file structure — add within, never replace.
 
 ## Data Flow
 
@@ -386,16 +384,17 @@ order, and what each command will do.
   │   Phase 1: Context Generation (Steps 1-5)           │
   │                                                     │
   │   Step 1 → STATE.md (diagnosis + conflicts)         │
-  │   Step 2 → DESIGN.md + tokens.css/ts ★              │
+  │   Step 2 → DESIGN.md (design tokens + constraints) ★              │
   │   Step 3 → AGENTS.md (gap decisions)                │
   │   Step 4 → SPEC.md (components + API contracts       │
   │            + DB schema + states + a11y/security)     │
   │            ★                                         │
   │   Step 5 → ASSETS.md + PLAN.md + PLAYBOOK.md        │
-  │            + .env.example                            │
-  │                                                     │
-  │   Output: Full-stack system context covering        │
-  │   UI → API → Data → Infrastructure                  │
+│            + .env.example                            │
+│                                                     │
+│   Output: Full-stack system context                 │
+│   (documentation only — no code files)              │
+│   covering UI → API → Data → Infrastructure         │
   └─────────────────────────────────────────────────────┘
             ▼ (user-triggered via /d2c code|test|deploy)
   ┌─────────────────────────────────────────────────────┐
@@ -412,9 +411,8 @@ order, and what each command will do.
 ## Interaction Style
 
 - Present diagnostics as an architect's analysis report, not a form
-- Frame every output in terms of how Code Agents will consume it: "This
-  DESIGN.md contains the spacing scale a Code Agent needs for consistent
-  layouts" or "These tokens in tokens.css are the single source of truth any
+- Frame every output in terms of how Code Agents will consume it: "This DESIGN.md contains the spacing scale a Code Agent needs for consistent
+  layouts" or "These tokens in DESIGN.md are the single source of truth any
   AI coding tool can reference"
 - Causal guidance: "Since your project already uses {X}, I'll build the context
   around that. Does that work for you?"

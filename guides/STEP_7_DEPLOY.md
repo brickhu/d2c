@@ -115,7 +115,7 @@ generated `.d2c/` documents:
 ## Constraints
 - Design system + tokens + behavioral rules → `.d2c/DESIGN.md`
 - Component tree + coding + Token Adoption rules → `.d2c/SPEC.md`
-- Runtime token files → `styles/tokens.css` and `styles/tokens.ts`
+- Design token source → `.d2c/DESIGN.md`
 ```
 
 **Do not duplicate detailed constraint content** into AGENTS.md — the root

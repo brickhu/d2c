@@ -90,9 +90,7 @@ cd my-project
 
 | 文件 | 内容 |
 |------|------|
-| `.d2c/DESIGN.md` | 设计令牌 + 行为约束 + 设计源 URL |
-| `styles/tokens.css` | CSS 自定义属性——所有视觉值的唯一真实来源 |
-| `styles/tokens.ts` | TypeScript 令牌导出（供 JS 运行时使用） |
+| `.d2c/DESIGN.md` | 设计令牌 + 行为约束 + 响应式断点 + 设计源 URL。纯文档。 |
 | `.d2c/AGENTS.md` | 项目上下文索引——技术栈、关键决策、约束 |
 | `.d2c/SPEC.md` | 组件树、API 契约、数据库 Schema、状态模式、测试策略、无障碍/安全基线 |
 | `.d2c/ASSETS.md` | 图片与动画资产清单（含本地路径） |
@@ -131,7 +129,7 @@ cd my-project
   │  阶段一：上下文生成（始终运行）                │
   │                                               │
   │  步骤一 → STATE.md（诊断 + 冲突识别）          │
-  │  步骤二 → DESIGN.md + tokens.css/ts           │
+  │  步骤二 → DESIGN.md（设计令牌 + 约束）          │
   │  步骤三 → AGENTS.md（架构决策）                │
   │  步骤四 → SPEC.md（组件 + API + 数据库 +      │
   │            状态 + 无障碍 + 安全）               │
@@ -174,7 +172,7 @@ cd ~/Projects/dashboard-app
 
 # ── 4. 经历 5 个引导步骤（AI 提问，你回答）──
 # 步骤一：项目调查 → 诊断报告
-# 步骤二：令牌提取 → DESIGN.md + tokens.css + tokens.ts
+# 步骤二：令牌提取 → DESIGN.md（纯文档）
 # 步骤三：架构问答（全栈）→ AGENTS.md
 # 步骤四：组件树 + API 契约 + 数据库 Schema → SPEC.md
 # 步骤五：资产 + PLAN.md + PLAYBOOK.md + .env.example
