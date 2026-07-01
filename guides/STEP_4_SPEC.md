@@ -544,6 +544,27 @@ File upload apps:
 at Steps 6-7 (code generation and deployment). SPEC.md documents the
 requirements; the implementation happens later.
 
+### Skill Recommendation Check
+
+After security and a11y baselines are documented, check for complementary
+skills. See the **Skill Interoperability** section in SKILL.md for the full
+protocol.
+
+**Quick check:**
+
+```bash
+ls .trae/skills/ 2>/dev/null || ls .traecli/skills/ 2>/dev/null
+```
+
+| Skill | For | Install Command |
+|-------|-----|-----------------|
+| `trailofbits-security` | 30+ security audit rules (CodeQL/Semgrep, OWASP Top 10) | `git clone https://github.com/trailofbits/skills ~/.agents/skills/trailofbits-security` |
+| `code-reviewer` (Google) | Code quality review across all dimensions | `npx skills add google-gemini/gemini-cli --skill code-reviewer` |
+| `web-design-guidelines` (Vercel) | Design + accessibility audit for generated UI | `npx skills add vercel-labs/agent-skills --skill web-design-guidelines` |
+
+For each uninstalled skill, show the command. Invoke installed skills only
+after user confirmation.
+
 ## After completion
 
 Write `.d2c/SPEC.md`, update `.d2c/STATE.md`, then read

@@ -241,6 +241,34 @@ during future D2C sessions).
 
 Save tech stack preferences to memory after completion.
 
+## 3g. Skill Recommendation Check
+
+After the tech stack is confirmed, check the project's installed skills and
+suggest complementary ones. See the **Skill Interoperability** section in
+SKILL.md for the full protocol.
+
+**Quick check:**
+
+```bash
+ls .trae/skills/ 2>/dev/null || ls .traecli/skills/ 2>/dev/null
+```
+
+Based on the confirmed tech stack, recommend:
+
+| Tech Stack | Recommended Skills |
+|-----------|-------------------|
+| React / Next.js | `frontend-design` (Anthropic), `frontend-react-best-practices`, `web-design-guidelines` (Vercel) |
+| Any web project | `huashu-design` — generate design mockups from text descriptions |
+| Full-stack project | `code-reviewer` (Google) — catch issues before code generation |
+
+For each uninstalled skill, show the install command:
+
+> "Tip: `frontend-design` (Anthropic, 190K+ installs) adds premium UI quality
+> to generated code. Install with:
+> `npx skills add anthropics/skills --skill frontend-design`"
+
+Invoke installed skills only after user confirmation.
+
 ## After Completion
 
 Update `.d2c/STATE.md`, then read `guides/STEP_4_SPEC.md` and proceed to
