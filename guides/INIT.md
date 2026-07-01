@@ -51,7 +51,7 @@ If the directory is empty (no project files at all), skip this step.
 After cleanup:
 
 1. Run `node <skill-dir>/scripts/d2c-status.js <design-url>` to get fresh state.
-2. Read `guides/STEP_1_OVERVIEW.md` and execute Step 1 (Project Overview &
+2. Read `guides/s1-overview.md` and execute Step 1 (Project Overview &
    Functional Diagnosis).
 
 ## Backup Rotation Chain

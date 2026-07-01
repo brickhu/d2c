@@ -151,4 +151,4 @@ On confirm:
 1. Write `.d2c/PRD.md`
 2. Update `.d2c/STATE.md`: current step = 2, completed = true
 3. Update todo list: mark Step 2 complete, set Step 3 to in_progress
-4. Read `guides/STEP_3_DESIGN.md` and proceed to Step 3
+4. Read `guides/s3-design.md` and proceed to Step 3

@@ -181,4 +181,4 @@ Use AskUserQuestion to confirm the DESIGN.md output:
 If user chooses "Modify", ask what they want to change and update DESIGN.md.
 On confirm, update `.d2c/STATE.md` to mark Step 3 complete. Then update the
 todo list: mark Step 3 complete, set Step 4 to in_progress. Read
-`guides/STEP_4_ARC.md` and proceed to Step 4.
+`guides/s4-arc.md` and proceed to Step 4.

@@ -8,7 +8,7 @@
 
 The design source can be:
 - **Figma design file** — Figma URL, .fig export, or screenshot
-- **Live website** — URL (already crawled in WEBSITE_INPUT.md)
+- **Live website** — URL (already crawled in website-input.md)
 - **Sketch file** — .sketch export
 
 Confirm the source type. If unclear, use AskUserQuestion.
@@ -93,4 +93,4 @@ On confirm:
 2. Write `.d2c/OVERVIEW.md`
 3. Update `.d2c/STATE.md`: current step = 1, completed = true
 4. Update todo list: mark Step 1 complete, set Step 2 to in_progress
-5. Read `guides/STEP_2_PRD.md` and proceed to Step 2
+5. Read `guides/s2-prd.md` and proceed to Step 2

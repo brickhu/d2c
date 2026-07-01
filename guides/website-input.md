@@ -131,5 +131,5 @@ When the user provides a website URL:
    ```bash
    node <skill-dir>/scripts/d2c-crawl.js "https://example.com" --output .d2c/crawled.json
    ```
-6. **Feed `crawled.json` into Step 3** — follow `guides/STEP_3_DESIGN.md` using the crawled data as input
+6. **Feed `crawled.json` into Step 3** — follow `guides/s3-design.md` using the crawled data as input
 7. **Proceed normally** through Steps 3-5

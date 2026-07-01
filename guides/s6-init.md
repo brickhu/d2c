@@ -300,4 +300,4 @@ todo list: mark "Generate AGENTS.md + PLAN.md + PLAYBOOK.md" complete with a
 summary of all generated files.
 
 If user chose "Start Code Generation", add C1 (Code) and C2 (Deploy) to the
-todo list and read `guides/STEP_7_CODE.md`.
+todo list and read `guides/s7-code.md`.

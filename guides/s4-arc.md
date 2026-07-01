@@ -273,4 +273,4 @@ Use AskUserQuestion to confirm:
 
 On confirm, update `.d2c/STATE.md` to mark Step 4 complete. Then update the
 todo list: mark Step 4 complete, set Step 5 to in_progress. Read
-`guides/STEP_5_SPEC.md` and proceed to Step 5.
+`guides/s5-spec.md` and proceed to Step 5.

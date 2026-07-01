@@ -584,4 +584,4 @@ Use AskUserQuestion to confirm the SPEC.md output:
 ```
 
 On confirm, update `.d2c/STATE.md` to mark Step 5 complete. Read
-`guides/STEP_6_INIT.md` to generate AGENTS.md, PLAN.md, ASSETS.md, and PLAYBOOK.md.
+`guides/s6-init.md` to generate AGENTS.md, PLAN.md, ASSETS.md, and PLAYBOOK.md.

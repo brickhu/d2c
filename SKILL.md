@@ -174,12 +174,12 @@ The crawler extracts:
 | Breakpoints | CSS media query min-width/max-width |
 
 The output JSON is compatible with the D2C fetch format, so Step 2's
-`STEP_3_DESIGN.md` guide processes it identically.
+`s3-design.md` guide processes it identically.
 
 **Fallback:** If Playwright cannot be installed, the Agent uses
 `integrated_browser` MCP tools to manually crawl and extract the same data.
 
-See `guides/WEBSITE_INPUT.md` for the full protocol.
+See `guides/website-input.md` for the full protocol.
 
 ## Design Types D2C Understands
 
@@ -196,20 +196,20 @@ including frontend UI, backend services, data models, API contracts, and deploym
 
 Designs that do not fit these categories (posters, logos, illustrations, PPT
 templates, 3D renders, print layouts) are **rejected** with a clear
-explanation. See `guides/STEP_1_OVERVIEW.md` for rejection format.
+explanation. See `guides/s1-overview.md` for rejection format.
 
 ## Commands
 
 | Command | What it does |
 |---------|-------------|
 | `/d2c <design-link-or-screenshot-or-file-or-website-url>` | **Smart entry.** Runs the status script, then presents a menu (or auto-selects, or shows a warning confirmation) based on project state. Website URLs trigger the crawling pipeline (see Website Crawling above) |
-| `/d2c <any natural language>` | **Context modification (existing project).** When `.d2c/STATE.md` exists and input is not a design/website/command, routes to modify existing context files via AI conversation — see `guides/CONTEXT_MODIFY.md` |
+| `/d2c <any natural language>` | **Context modification (existing project).** When `.d2c/STATE.md` exists and input is not a design/website/command, routes to modify existing context files via AI conversation — see `guides/context-modify.md` |
 | `/d2c init [new-design-link]` | **Force a fresh start.** Backs up existing `.d2c/`, cleans generated context (with user confirmation), and enters Step 1 — see `guides/INIT.md` |
 | `/d2c update [new-design-link]` | **Iterate on the current design.** Resumes from the recorded step, or does an incremental diff if a new link is provided — see `guides/UPDATE.md` |
 | `/d2c sync` | **Push style changes back to Figma.** Requires an existing `.d2c/DESIGN.md` with a Figma URL and write access — see `guides/SYNC.md` |
-| `/d2c code` | **Execute the implementation plan.** Generates production code aligned to design tokens and specs — see `guides/STEP_7_CODE.md` |
+| `/d2c code` | **Execute the implementation plan.** Generates production code aligned to design tokens and specs — see `guides/s7-code.md` |
 | `/d2c test` | **Generate test suites.** Follows the testing strategy defined in PLAYBOOK.md and SPEC.md. Creates unit, integration, and E2E tests for the implemented code |
-| `/d2c deploy` | **Prepare deployment.** Generates CI/CD config and build verification — see `guides/STEP_8_DEPLOY.md` |
+| `/d2c deploy` | **Prepare deployment.** Generates CI/CD config and build verification — see `guides/s8-deploy.md` |
 
 Running `/d2c update` or `/d2c sync` without an existing `.d2c/STATE.md` will
 tell the user to run `/d2c <design>` first.
@@ -269,13 +269,13 @@ After the user's choice, dispatch:
   { "label": "Cancel", "description": "Do nothing" }
 ]}
 ```
-On confirm, follow `guides/WEBSITE_INPUT.md`. After crawling, feed into Step 2.
+On confirm, follow `guides/website-input.md`. After crawling, feed into Step 2.
 
 **Branch B — Natural Language Input:** Input is NOT a known command, NOT a
 design input, NOT a website URL, AND `.d2c/STATE.md` exists. Route to context
 modification mode.
 
-Read `guides/CONTEXT_MODIFY.md` and follow its workflow.
+Read `guides/context-modify.md` and follow its workflow.
 
 If `.d2c/STATE.md` does NOT exist and input is unrecognizable, use AskUserQuestion:
 ```json
@@ -355,11 +355,11 @@ Each step has a detailed execution guide in the `guides/` directory.
 
 | Step | Name | Key Output | Guide |
 |------|------|-----------|-------|
-| **1** | Project Overview & Meta | `.d2c/OVERVIEW.md` — project name, type, purpose, audience, meta | `guides/STEP_1_OVERVIEW.md` |
-| **2** | Business Requirements | `.d2c/PRD.md` — business goals, feature scope, user flows, page structure, success criteria | `guides/STEP_2_PRD.md` |
-| **3** | Design System & Tokens | `.d2c/DESIGN.md` — design tokens, components, animation, constraints, responsive breakpoints ★ | `guides/STEP_3_DESIGN.md` |
-| **4** | Architecture & Tech Stack | `.d2c/ARC.md` — frontend + backend framework, deployment strategy, tech decisions | `guides/STEP_4_ARC.md` |
-| **5** | Development Spec & Constraints | `.d2c/SPEC.md` — file structure, env vars, API contracts, component tree, coding constraints, testing strategy ★ | `guides/STEP_5_SPEC.md` |
+| **1** | Project Overview & Meta | `.d2c/OVERVIEW.md` — project name, type, purpose, audience, meta | `guides/s1-overview.md` |
+| **2** | Business Requirements | `.d2c/PRD.md` — business goals, feature scope, user flows, page structure, success criteria | `guides/s2-prd.md` |
+| **3** | Design System & Tokens | `.d2c/DESIGN.md` — design tokens, components, animation, constraints, responsive breakpoints ★ | `guides/s3-design.md` |
+| **4** | Architecture & Tech Stack | `.d2c/ARC.md` — frontend + backend framework, deployment strategy, tech decisions | `guides/s4-arc.md` |
+| **5** | Development Spec & Constraints | `.d2c/SPEC.md` — file structure, env vars, API contracts, component tree, coding constraints, testing strategy ★ | `guides/s5-spec.md` |
 
 **Flow:** Dispatch → init todos → Step 1 → read guide → execute →
 AskUserQuestion confirm → Step 2 → ... → Step 5 → Post-5-step.
@@ -380,7 +380,7 @@ synthesizes the summary documents from them:
 | `PLAN.md` | Atomic development task list (code → test → deploy) | PRD.md + ARC.md + SPEC.md |
 | `.d2c/PLAYBOOK.md` | Execution roadmap — env vars, phases, handoff guide | ARC.md + SPEC.md |
 
-The guide for this post-step generation is `guides/STEP_6_INIT.md`.
+The guide for this post-step generation is `guides/s6-init.md`.
 
 Use AskUserQuestion to ask whether to proceed to Phase 2 (code generation) or stop.
 
@@ -391,8 +391,8 @@ for code generation or deployment.
 
 | Step | Name | Key Output | Guide | Trigger |
 |------|------|-----------|-------|---------|
-| **C1** | Code Generation | Token-adopted project code (per PLAN.md, task-by-task; Zero hard-coded values) | `guides/STEP_7_CODE.md` | User command only |
-| **C2** | Deployment | Deployable app + deployment config + `README.md` + finalize `AGENTS.md` (deploy info) | `guides/STEP_8_DEPLOY.md` | Even more optional |
+| **C1** | Code Generation | Token-adopted project code (per PLAN.md, task-by-task; Zero hard-coded values) | `guides/s7-code.md` | User command only |
+| **C2** | Deployment | Deployable app + deployment config + `README.md` + finalize `AGENTS.md` (deploy info) | `guides/s8-deploy.md` | Even more optional |
 
 When the user triggers Phase 2:
 - Agent resumes from the state recorded in `.d2c/STATE.md`
@@ -425,13 +425,13 @@ step recorded in `.d2c/STATE.md`:
 | Current step | Resume behavior |
 |-------------|----------------|
 | Step 1 | Show OVERVIEW.md summary, confirm or adjust |
-| Step 2 | Read `guides/STEP_2_PRD.md`, show PRD.md summary, continue |
-| Step 3 | Read `guides/STEP_3_DESIGN.md`, show DESIGN.md summary, continue |
-| Step 4 | Read `guides/STEP_4_ARC.md`, continue incomplete Q&A |
-| Step 5 | Read `guides/STEP_5_SPEC.md`, regenerate or continue |
-| Post-5-step | Read `guides/STEP_6_INIT.md`, reuse existing assets if available |
-| C1 (Code) | Read `guides/STEP_7_CODE.md`, show progress, ask which task to continue from |
-| C2 (Deploy) | Read `guides/STEP_8_DEPLOY.md`, check deployment config, continue |
+| Step 2 | Read `guides/s2-prd.md`, show PRD.md summary, continue |
+| Step 3 | Read `guides/s3-design.md`, show DESIGN.md summary, continue |
+| Step 4 | Read `guides/s4-arc.md`, continue incomplete Q&A |
+| Step 5 | Read `guides/s5-spec.md`, regenerate or continue |
+| Post-5-step | Read `guides/s6-init.md`, reuse existing assets if available |
+| C1 (Code) | Read `guides/s7-code.md`, show progress, ask which task to continue from |
+| C2 (Deploy) | Read `guides/s8-deploy.md`, check deployment config, continue |
 
 ## Conflict Handling (surfaced in Step 1)
 
@@ -447,7 +447,7 @@ in a Next.js project). This is surfaced with four resolution options:
 | **Proceed anyway, note the risk** | Flag as risk, user will handle manually |
 | **Cancel** | Abort D2C |
 
-See `guides/STEP_1_OVERVIEW.md` for the full detection table and output format.
+See `guides/s1-overview.md` for the full detection table and output format.
 
 ## AI Completion — Filling Design Gaps
 
@@ -555,7 +555,7 @@ order, and what each command will do.
   │
   └─ Is it natural language + .d2c/STATE.md exists?
       YES → Context modification mode
-            Read guides/CONTEXT_MODIFY.md
+            Read guides/context-modify.md
             Intent analysis → AI-propose changes → confirm → write
       
   If none of the above → ask user for direction

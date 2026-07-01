@@ -52,7 +52,7 @@ Before writing the first line of code:
 ## 6d. Token Adoption Rules (MANDATORY)
 
 Every component file generated in this step MUST follow the Token Adoption rules
-defined in `guides/STEP_5_SPEC.md` section 4d. Summary of hard rules:
+defined in `guides/s5-spec.md` section 4d. Summary of hard rules:
 
 | # | Rule | Check |
 |---|------|-------|
