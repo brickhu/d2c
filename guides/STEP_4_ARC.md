@@ -1,7 +1,8 @@
-# Step 3 — Architecture & Deployment Alignment (ARCHITECTURE)
+# Step 4 — Architecture & Tech Stack (ARC)
 
 **Input:** Diagnostic report + DESIGN.md + Project Survey results (from `.d2c/STATE.md`)
-**Output:** `AGENTS.md` (root, visible to all AI coding tools) + gap decisions (AI-proposed, user-confirmed)
+**Output:** `.d2c/ARC.md` (frontend + backend tech stack, deployment strategy, architecture decisions)
+**Decision:** AskUserQuestion confirmation before Step 5
 
 ## 3a. Adapt to Project State
 
@@ -241,7 +242,7 @@ during future D2C sessions).
 
 Save tech stack preferences to memory after completion.
 
-## 3g. Skill Recommendation Check
+## 4g. Skill Recommendation Check
 
 After the tech stack is confirmed, check the project's installed skills and
 suggest complementary ones. See the **Skill Interoperability** section in
@@ -264,12 +265,12 @@ Use AskUserQuestion to confirm:
 
 ```json
 { "header": "Confirm", "question": "AGENTS.md is ready. Review and confirm?", "options": [
-  { "label": "Confirm & Continue", "description": "Proceed to Step 4 — Coding Standards & Specs" },
+  { "label": "Confirm & Continue", "description": "Proceed to Step 5 — Development Spec & Constraints" },
   { "label": "Modify", "description": "I want to change some decisions" },
   { "label": "Cancel", "description": "Abort D2C" }
 ]}
 ```
 
-On confirm, update `.d2c/STATE.md` to mark Step 3 complete. Then update the
-todo list: mark Step 3 complete, set Step 4 to in_progress. Read
-`guides/STEP_4_SPEC.md` and proceed to Step 4.
+On confirm, update `.d2c/STATE.md` to mark Step 4 complete. Then update the
+todo list: mark Step 4 complete, set Step 5 to in_progress. Read
+`guides/STEP_5_SPEC.md` and proceed to Step 5.

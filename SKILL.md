@@ -1,6 +1,6 @@
 ---
 name: "d2c"
-description: "Design2Context (D2C) — A design-to-AI-context workflow. Converts design files (Figma, image) or live websites into structured, full-stack system context covering frontend, backend, data, and infrastructure for Code Agents (Claude Code, Cursor, Windsurf, etc.). Produces DESIGN.md (tokens + constraints), AGENTS.md, SPEC.md, PLAN.md, ASSETS.md, and PLAYBOOK.md. Input: design link, screenshot, or website URL → Output: context files for AI coding agents. Phase 1 produces documentation only — no code files. Code generation is optional, triggered by user command at the end."
+description: "Design2Context (D2C) — A design-to-AI-context workflow. Converts design files (Figma, image) or live websites into structured, full-stack system context in 5 steps: OVERVIEW.md (project meta), PRD.md (business requirements), DESIGN.md (tokens + components + animation), ARC.md (architecture + tech stack), SPEC.md (development spec + constraints). Then generates AGENTS.md, PLAN.md, ASSETS.md, and PLAYBOOK.md. Input: design link, screenshot, or website URL → Output: context files for AI coding agents. Phase 1 produces documentation only — no code files. Code generation is optional, triggered by user command."
 
 run_condition: "
   User provides a design link (Figma, Penpot, etc.), a design screenshot, a
@@ -174,7 +174,7 @@ The crawler extracts:
 | Breakpoints | CSS media query min-width/max-width |
 
 The output JSON is compatible with the D2C fetch format, so Step 2's
-`STEP_2_TOKENS.md` guide processes it identically.
+`STEP_3_DESIGN.md` guide processes it identically.
 
 **Fallback:** If Playwright cannot be installed, the Agent uses
 `integrated_browser` MCP tools to manually crawl and extract the same data.
@@ -196,7 +196,7 @@ including frontend UI, backend services, data models, API contracts, and deploym
 
 Designs that do not fit these categories (posters, logos, illustrations, PPT
 templates, 3D renders, print layouts) are **rejected** with a clear
-explanation. See `guides/STEP_1_DIAGNOSIS.md` for rejection format.
+explanation. See `guides/STEP_1_OVERVIEW.md` for rejection format.
 
 ## Commands
 
@@ -207,9 +207,9 @@ explanation. See `guides/STEP_1_DIAGNOSIS.md` for rejection format.
 | `/d2c init [new-design-link]` | **Force a fresh start.** Backs up existing `.d2c/`, cleans generated context (with user confirmation), and enters Step 1 — see `guides/INIT.md` |
 | `/d2c update [new-design-link]` | **Iterate on the current design.** Resumes from the recorded step, or does an incremental diff if a new link is provided — see `guides/UPDATE.md` |
 | `/d2c sync` | **Push style changes back to Figma.** Requires an existing `.d2c/DESIGN.md` with a Figma URL and write access — see `guides/SYNC.md` |
-| `/d2c code` | **Execute the implementation plan.** Resumes from Step 6 using the PLAN.md and PLAYBOOK.md context. Generates production code aligned to design tokens and specs — see `guides/STEP_6_CODE.md` |
+| `/d2c code` | **Execute the implementation plan.** Generates production code aligned to design tokens and specs — see `guides/STEP_7_CODE.md` |
 | `/d2c test` | **Generate test suites.** Follows the testing strategy defined in PLAYBOOK.md and SPEC.md. Creates unit, integration, and E2E tests for the implemented code |
-| `/d2c deploy` | **Prepare deployment.** Resumes from Step 7 using deployment config from AGENTS.md and PLAYBOOK.md. Generates CI/CD config and build verification — see `guides/STEP_7_DEPLOY.md` |
+| `/d2c deploy` | **Prepare deployment.** Generates CI/CD config and build verification — see `guides/STEP_8_DEPLOY.md` |
 
 Running `/d2c update` or `/d2c sync` without an existing `.d2c/STATE.md` will
 tell the user to run `/d2c <design>` first.
@@ -300,11 +300,12 @@ see where they are at a glance.
 
 ```json
 [
-  { "id": "1", "content": "Step 1: Project Survey & Diagnosis", "status": "in_progress", "priority": "high" },
-  { "id": "2", "content": "Step 2: Extract Design Tokens → DESIGN.md", "status": "pending", "priority": "high" },
-  { "id": "3", "content": "Step 3: Architecture Alignment → AGENTS.md", "status": "pending", "priority": "high" },
-  { "id": "4", "content": "Step 4: Spec & Component Mapping → SPEC.md", "status": "pending", "priority": "high" },
-  { "id": "5", "content": "Step 5: Assets & Plan → ASSETS.md + PLAN.md + PLAYBOOK.md", "status": "pending", "priority": "high" }
+  { "id": "1", "content": "Step 1: Project Overview → OVERVIEW.md", "status": "in_progress", "priority": "high" },
+  { "id": "2", "content": "Step 2: Business Requirements → PRD.md", "status": "pending", "priority": "high" },
+  { "id": "3", "content": "Step 3: Design System → DESIGN.md", "status": "pending", "priority": "high" },
+  { "id": "4", "content": "Step 4: Architecture → ARC.md", "status": "pending", "priority": "high" },
+  { "id": "5", "content": "Step 5: Development Spec → SPEC.md", "status": "pending", "priority": "high" },
+  { "id": "6", "content": "Generate AGENTS.md + PLAN.md + PLAYBOOK.md", "status": "pending", "priority": "medium" }
 ]
 ```
 
@@ -354,21 +355,34 @@ Each step has a detailed execution guide in the `guides/` directory.
 
 | Step | Name | Key Output | Guide |
 |------|------|-----------|-------|
-| **1** | Project Survey & Diagnosis | Diagnostic report (chat) + conflict resolution + `.d2c/STATE.md` | `guides/STEP_1_DIAGNOSIS.md` |
-| **2** | Extract Design Tokens | `.d2c/DESIGN.md` (tokens + constraints + responsive breakpoints — documentation only, no code files) ★ | `guides/STEP_2_TOKENS.md` |
-| **3** | Architecture Alignment | `AGENTS.md` (root) + `.d2c/AGENTS_bak.md` (copy for D2C resume) — lightweight project context index + gap decisions (AI-proposed + user-confirmed) | `guides/STEP_3_ARCHITECTURE.md` |
-| **4** | Coding Standards & Component Mapping | `.d2c/SPEC.md` (directory structure, component tree, constraints, testing strategy) ★ | `guides/STEP_4_SPEC.md` |
-| **5** | Init, Assets & Plan | Scaffold (if needed) + downloaded assets + `.d2c/ASSETS.md` + `PLAN.md` + **`.d2c/PLAYBOOK.md`** (execution roadmap covering code → test → deploy) | `guides/STEP_5_INIT.md` |
+| **1** | Project Overview & Meta | `.d2c/OVERVIEW.md` — project name, type, purpose, audience, meta | `guides/STEP_1_OVERVIEW.md` |
+| **2** | Business Requirements | `.d2c/PRD.md` — business goals, feature scope, user flows, page structure, success criteria | `guides/STEP_2_PRD.md` |
+| **3** | Design System & Tokens | `.d2c/DESIGN.md` — design tokens, components, animation, constraints, responsive breakpoints ★ | `guides/STEP_3_DESIGN.md` |
+| **4** | Architecture & Tech Stack | `.d2c/ARC.md` — frontend + backend framework, deployment strategy, tech decisions | `guides/STEP_4_ARC.md` |
+| **5** | Development Spec & Constraints | `.d2c/SPEC.md` — file structure, env vars, API contracts, component tree, coding constraints, testing strategy ★ | `guides/STEP_5_SPEC.md` |
 
-**Flow:** Dispatch → init todos → (init backup/cleanup if needed) → Step 1 →
-read guide → execute → AskUserQuestion confirm → Step 2 → read guide → execute
-→ AskUserQuestion confirm → ... → Step 5.
+**Flow:** Dispatch → init todos → Step 1 → read guide → execute →
+AskUserQuestion confirm → Step 2 → ... → Step 5 → Post-5-step.
 
 After each step: update TodoWrite to mark it complete, move the next to
 in_progress.
 
-After Step 5 completes, all context files are ready. Use AskUserQuestion to
-ask whether to proceed to Phase 2 or stop.
+### Post-5-Step Generation
+
+After Step 5 completes, the 5 core context files are ready. D2C then
+synthesizes the summary documents from them:
+
+| Output | Purpose | Derived from |
+|--------|---------|--------------|
+| `AGENTS.md` (root) | Project context index — auto-detected by AI coding tools | OVERVIEW.md + ARC.md + SPEC.md |
+| `.d2c/AGENTS_bak.md` | D2C resume copy | Same as AGENTS.md |
+| `.d2c/ASSETS.md` | Image/animation asset manifest with local paths | DESIGN.md + design data |
+| `PLAN.md` | Atomic development task list (code → test → deploy) | PRD.md + ARC.md + SPEC.md |
+| `.d2c/PLAYBOOK.md` | Execution roadmap — env vars, phases, handoff guide | ARC.md + SPEC.md |
+
+The guide for this post-step generation is `guides/STEP_6_INIT.md`.
+
+Use AskUserQuestion to ask whether to proceed to Phase 2 (code generation) or stop.
 
 ### Phase 2: Optional — Code Generation & Deployment (Steps 6-7, user-triggered)
 
@@ -377,8 +391,8 @@ for code generation or deployment.
 
 | Step | Name | Key Output | Guide | Trigger |
 |------|------|-----------|-------|---------|
-| **6** | Code Generation | Token-adopted project code (per PLAN.md, task-by-task; Zero hard-coded values) | `guides/STEP_6_CODE.md` | User command only |
-| **7** | Deployment | Deployable app + deployment config + `README.md` + finalize `AGENTS.md` (deploy info) | `guides/STEP_7_DEPLOY.md` | Even more optional |
+| **C1** | Code Generation | Token-adopted project code (per PLAN.md, task-by-task; Zero hard-coded values) | `guides/STEP_7_CODE.md` | User command only |
+| **C2** | Deployment | Deployable app + deployment config + `README.md` + finalize `AGENTS.md` (deploy info) | `guides/STEP_8_DEPLOY.md` | Even more optional |
 
 When the user triggers Phase 2:
 - Agent resumes from the state recorded in `.d2c/STATE.md`
@@ -390,13 +404,16 @@ When the user triggers Phase 2:
 | File | Purpose | Created by |
 |------|---------|------------|
 | `.d2c/STATE.md` | Workflow progress state machine | Steps 1-5 |
-| `.d2c/DESIGN.md` | Design Tokens + constraints (behavioral rules, responsive breakpoints, component states) + design source URL. **Documentation only — single source of truth for all visual values.** | Step 2 |
-| `AGENTS.md` | **Project context index (root)** — lightweight summary auto-detected by all AI coding tools; references `.d2c/` for details. Includes responsive design strategy for web projects. | Step 3 |
-| `.d2c/AGENTS_bak.md` | Authoritative copy for D2C resume/reference | Step 3 (copy) |
-| `.d2c/SPEC.md` | Component tree, API contracts (schema-level), database schema, state patterns, directory structure, coding constraints + Token Adoption rules + testing strategy + error handling + a11y/security baselines | Step 4 |
-| `.d2c/ASSETS.md` | Image/animation asset manifest with local paths | Step 5 |
-| `PLAN.md` | Atomic development task list (code → test → deploy) | Step 5 |
-| **`.d2c/PLAYBOOK.md`** | **Execution roadmap — required env vars, implementation phases (code/test/deploy), step-by-step handoff guide** | **Step 5** |
+| `.d2c/OVERVIEW.md` | Project name, type, purpose, audience, meta, design source URL | Step 1 |
+| `.d2c/PRD.md` | Business goals, feature scope, user flows, page structure, success criteria | Step 2 |
+| `.d2c/DESIGN.md` | Design tokens, components, animation, constraints, responsive breakpoints. **Documentation only — single source of truth for all visual values.** | Step 3 |
+| `.d2c/ARC.md` | Frontend + backend tech stack, deployment strategy, architecture decisions. **Principle: keep it simple and clear.** | Step 4 |
+| `.d2c/SPEC.md` | File structure, env vars, API contracts, component tree, coding constraints, testing strategy, error handling, a11y/security baselines | Step 5 |
+| `AGENTS.md` | **Project context index (root)** — lightweight summary auto-detected by all AI coding tools; references `.d2c/` for details | Post-5-step |
+| `.d2c/AGENTS_bak.md` | Authoritative copy for D2C resume/reference | Post-5-step (copy) |
+| `.d2c/ASSETS.md` | Image/animation asset manifest with local paths | Post-5-step |
+| `PLAN.md` | Atomic development task list (code → test → deploy) | Post-5-step |
+| `.d2c/PLAYBOOK.md` | Execution roadmap — required env vars, implementation phases, step-by-step handoff guide | Post-5-step |
 | `.d2c.bak/` | Backup of previous design's state (on context switch) | Auto |
 | `.d2c.restart.bak*/` | Pre-init backups, rotated | Auto (`/d2c init`) |
 
@@ -407,13 +424,14 @@ step recorded in `.d2c/STATE.md`:
 
 | Current step | Resume behavior |
 |-------------|----------------|
-| Step 1 | Show diagnostic report again, request confirmation |
-| Step 2 | Read `guides/STEP_2_TOKENS.md`, show DESIGN.md summary, continue |
-| Step 3 | Read guide, continue incomplete Q&A (re-run status script to detect any new project files) |
-| Step 4 | Read guide, regenerate or continue |
-| Step 5 | Read guide, reuse scaffold if exists; check downloaded assets |
-| Step 6 | Read guide, show progress, ask which task to continue from |
-| Step 7 | Read guide, check deployment config, continue |
+| Step 1 | Show OVERVIEW.md summary, confirm or adjust |
+| Step 2 | Read `guides/STEP_2_PRD.md`, show PRD.md summary, continue |
+| Step 3 | Read `guides/STEP_3_DESIGN.md`, show DESIGN.md summary, continue |
+| Step 4 | Read `guides/STEP_4_ARC.md`, continue incomplete Q&A |
+| Step 5 | Read `guides/STEP_5_SPEC.md`, regenerate or continue |
+| Post-5-step | Read `guides/STEP_6_INIT.md`, reuse existing assets if available |
+| C1 (Code) | Read `guides/STEP_7_CODE.md`, show progress, ask which task to continue from |
+| C2 (Deploy) | Read `guides/STEP_8_DEPLOY.md`, check deployment config, continue |
 
 ## Conflict Handling (surfaced in Step 1)
 
@@ -429,7 +447,7 @@ in a Next.js project). This is surfaced with four resolution options:
 | **Proceed anyway, note the risk** | Flag as risk, user will handle manually |
 | **Cancel** | Abort D2C |
 
-See `guides/STEP_1_DIAGNOSIS.md` for the full detection table and output format.
+See `guides/STEP_1_OVERVIEW.md` for the full detection table and output format.
 
 ## AI Completion — Filling Design Gaps
 
@@ -545,18 +563,17 @@ order, and what each command will do.
   ┌─────────────────────────────────────────────────────┐
   │   Phase 1: Context Generation (Steps 1-5)           │
   │                                                     │
-  │   Step 1 → STATE.md (diagnosis + conflicts)         │
-  │   Step 2 → DESIGN.md (design tokens + constraints) ★              │
-  │   Step 3 → AGENTS.md (gap decisions)                │
-  │   Step 4 → SPEC.md (components + API contracts       │
-  │            + DB schema + states + a11y/security)     │
-  │            ★                                         │
-  │   Step 5 → ASSETS.md + PLAN.md + PLAYBOOK.md        │
-│            + .env.example                            │
-│                                                     │
-│   Output: Full-stack system context                 │
-│   (documentation only — no code files)              │
-│   covering UI → API → Data → Infrastructure         │
+  │   Step 1 → OVERVIEW.md (project meta) ★              │
+  │   Step 2 → PRD.md (business requirements)           │
+  │   Step 3 → DESIGN.md (design tokens + constraints) ★ │
+  │   Step 4 → ARC.md (architecture & tech stack)       │
+  │   Step 5 → SPEC.md (development spec & constraints)  │
+  │            ↓                                  │
+  │   Post-5-step → AGENTS.md + PLAN.md + PLAYBOOK.md + ASSETS.md   │
+  │                                                     │
+  │   Output: Full-stack system context                 │
+  │   (documentation only — no code files)              │
+  │   covering UI → API → Data → Infrastructure         │
   └─────────────────────────────────────────────────────┘
             ▼ (user-triggered via /d2c code|test|deploy)
   ┌─────────────────────────────────────────────────────┐
@@ -599,9 +616,9 @@ At each of these points, pause and check for complementary skills:
 
 | Trigger | When | Recommended Skills | Install Command |
 |---------|------|-------------------|-----------------|
-| **Step 3 — Architecture** | Tech stack decided (frontend framework chosen) | `frontend-design` (Anthropic) — premium UI quality. `frontend-react-best-practices` — React code quality rules. `web-design-guidelines` (Vercel) — design + a11y audit. `huashu-design` — design generation from text. | `npx skills add anthropics/skills --skill frontend-design` / `npx skills add vercel-labs/agent-skills --skill web-design-guidelines` / `npx skills add alchaincyf/huashu-design` |
-| **Step 4 — SPEC** | Security & a11y baselines section | `trailofbits-security` — 30+ security audit skills (CodeQL/Semgrep, OWASP Top 10). `code-reviewer` (Google) — code quality review. | `git clone https://github.com/trailofbits/skills ~/.agents/skills/trailofbits-security` / `npx skills add google-gemini/gemini-cli --skill code-reviewer` |
-| **Step 6 — Code** | Before code generation | `webapp-testing` (Anthropic) — Playwright E2E tests. `finishing-a-development-branch` — pre-merge test gate. `design-taste-frontend` — UI quality audit. | `npx skills add anthropics/skills --skill webapp-testing` / `npx skills add obra/superpowers --skill finishing-a-development-branch` |
+| **Step 4 — Architecture** | Tech stack decided (frontend framework chosen) | `frontend-design` (Anthropic) — premium UI quality. `frontend-react-best-practices` — React code quality rules. `web-design-guidelines` (Vercel) — design + a11y audit. `huashu-design` — design generation from text. | `npx skills add anthropics/skills --skill frontend-design` / `npx skills add vercel-labs/agent-skills --skill web-design-guidelines` / `npx skills add alchaincyf/huashu-design` |
+| **Step 5 — SPEC** | Security & a11y baselines section | `trailofbits-security` — 30+ security audit skills (CodeQL/Semgrep, OWASP Top 10). `code-reviewer` (Google) — code quality review. | `git clone https://github.com/trailofbits/skills ~/.agents/skills/trailofbits-security` / `npx skills add google-gemini/gemini-cli --skill code-reviewer` |
+| **C1 — Code** | Before code generation | `webapp-testing` (Anthropic) — Playwright E2E tests. `finishing-a-development-branch` — pre-merge test gate. `design-taste-frontend` — UI quality audit. | `npx skills add anthropics/skills --skill webapp-testing` / `npx skills add obra/superpowers --skill finishing-a-development-branch` |
 
 ### Recommendation Protocol
 

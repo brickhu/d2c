@@ -1,9 +1,12 @@
-# Step 5 — Scaffold, Assets, Plan & Playbook (INIT)
+# Post-5-Step — Summary Generation (INIT)
 
-**Input:** SPEC.md + AGENTS.md
-**Output:** Scaffold + local image/animation assets + `ASSETS.md` + `PLAN.md` + **`.d2c/PLAYBOOK.md`**
+**Input:** OVERVIEW.md + PRD.md + DESIGN.md + ARC.md + SPEC.md
+**Output:** AGENTS.md + ASSETS.md + PLAN.md + PLAYBOOK.md
 
-## 5a. Scaffolding
+> This step runs after the 5 core steps are complete. It synthesizes the
+> summary documents from the core context files.
+
+## 6a. Scaffolding
 
 Check the Project Survey results from `.d2c/STATE.md`:
 
@@ -25,7 +28,7 @@ files. Only create missing helper directories (see 5b).
 **If this is an Update (via `/d2c update`):**
 **Skip scaffolding.**
 
-## 5b. Helper Directories
+## 6b. Helper Directories
 
 For full-stack projects (frontend + backend in one repo):
 
@@ -48,7 +51,7 @@ For standalone backend:
 mkdir -p src/routes src/services src/middleware src/models src/db/migrations tests/unit tests/integration
 ```
 
-## 5c. Image & Animation Asset Download ⭐
+## 6c. Image & Animation Asset Download ⭐
 
 Download all image and animation nodes identified in Step 1.
 
@@ -110,7 +113,7 @@ suffix for animations, never use Figma node IDs as filenames.
 
 **Update mode:** Only download new/changed resources. Append incrementally.
 
-## 5d. Generate PLAN.md
+## 6d. Generate PLAN.md
 
 Break into atomic, independently compilable tasks (15-45 min each). The plan
 should cover three areas to match the PLAYBOOK: **implementation, testing,
@@ -142,7 +145,7 @@ Label each task with its phase prefix so the PLAYBOOK can reference them:
 
 **Update mode:** Append as **《Design v{number} Increment》** section.
 
-## 5e. Generate PLAYBOOK.md — Execution Roadmap
+## 6e. Generate PLAYBOOK.md — Execution Roadmap
 
 Generate `.d2c/PLAYBOOK.md` — the single handoff document that tells the user
 (or a Code Agent) exactly what to do after context generation completes. This
@@ -237,7 +240,7 @@ Read from AGENTS.md and SPEC.md to populate:
 - **Deployment steps:** From AGENTS.md deployment target
 - **External services:** From Step 3e Gap Q&A results
 
-## 5f. Generate .env.example
+## 6f. Generate .env.example
 
 Generate a `.env.example` file at the project root from the env vars confirmed
 in Step 3 Gap Q&A. This file serves as the **developer onboarding reference** —
@@ -292,8 +295,9 @@ Use AskUserQuestion to confirm the plan and playbook:
 ]}
 ```
 
-On confirm, update `.d2c/STATE.md` to mark Step 5 complete. Then update the
-todo list: mark Step 5 complete with a summary of all generated files.
+On confirm, update `.d2c/STATE.md` to mark post-5-step complete. Then update the
+todo list: mark "Generate AGENTS.md + PLAN.md + PLAYBOOK.md" complete with a
+summary of all generated files.
 
-If user chose "Start Code Generation", add Step 6 and Step 7 to the todo list
-and read `guides/STEP_6_CODE.md`.
+If user chose "Start Code Generation", add C1 (Code) and C2 (Deploy) to the
+todo list and read `guides/STEP_7_CODE.md`.

@@ -1,9 +1,9 @@
-# Step 2 — Extract Design Tokens (TOKENS)
+# Step 3 — Design System & Tokens (DESIGN)
 
 **Input:** Design details + confirmed diagnostic report
-**Output:** `.d2c/DESIGN.md` (design tokens + constraints, documentation only)
+**Output:** `.d2c/DESIGN.md` (design tokens, components, animation, constraints — documentation only)
 
-> **Important:** Phase 1 produces documentation only — no code files. All token values are recorded in DESIGN.md. Code files (CSS/TS token exports) are created in Step 6 (Code Generation), if applicable to the target framework.
+> **Important:** Phase 1 produces documentation only — no code files. All token values are recorded in DESIGN.md.
 
 ## 2a. Extract Tokens from Design Data
 
@@ -172,13 +172,13 @@ Use AskUserQuestion to confirm the DESIGN.md output:
 
 ```json
 { "header": "Confirm", "question": "DESIGN.md is ready. Review and confirm?", "options": [
-  { "label": "Confirm & Continue", "description": "Proceed to Step 3 — Architecture Alignment" },
+  { "label": "Confirm & Continue", "description": "Proceed to Step 4 — Architecture & Tech Stack" },
   { "label": "Modify", "description": "I want to adjust some token values" },
   { "label": "Cancel", "description": "Abort D2C" }
 ]}
 ```
 
 If user chooses "Modify", ask what they want to change and update DESIGN.md.
-On confirm, update `.d2c/STATE.md` to mark Step 2 complete. Then update the
-todo list: mark Step 2 complete, set Step 3 to in_progress. Read
-`guides/STEP_3_ARCHITECTURE.md` and proceed to Step 3.
+On confirm, update `.d2c/STATE.md` to mark Step 3 complete. Then update the
+todo list: mark Step 3 complete, set Step 4 to in_progress. Read
+`guides/STEP_4_ARC.md` and proceed to Step 4.

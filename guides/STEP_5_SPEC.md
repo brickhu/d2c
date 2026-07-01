@@ -1,7 +1,8 @@
-# Step 4 — Coding Standards & Component Mapping (SPEC)
+# Step 5 — Development Spec & Constraints (SPEC)
 
 **Input:** DESIGN.md + AGENTS.md + design + Project Survey results
-**Output:** `.d2c/SPEC.md` (frontend component tree + API contracts + data models)
+**Output:** .d2c/SPEC.md (file structure, env vars, api contracts, component tree, coding constraints, testing strategy)
+**Decision:** AskUserQuestion confirmation before Phase 1 completion
 
 ## 4a. Directory Structure
 
@@ -575,13 +576,12 @@ For each uninstalled skill, use AskUserQuestion:
 Use AskUserQuestion to confirm the SPEC.md output:
 
 ```json
-{ "header": "Confirm", "question": "SPEC.md is ready. Review and confirm?", "options": [
-  { "label": "Confirm & Continue", "description": "Proceed to Step 5 — Assets, Plan & Playbook" },
+{ "header": "Confirm", "question": "SPEC.md is ready. Phase 1 (Design Analysis & Planning) is complete. Review and confirm?", "options": [
+  { "label": "Confirm & Continue", "description": "Phase 1 Complete — Generate AGENTS.md, PLAN.md, PLAYBOOK.md" },
   { "label": "Modify", "description": "I want to adjust the spec" },
   { "label": "Cancel", "description": "Abort D2C" }
 ]}
 ```
 
-On confirm, update `.d2c/STATE.md` to mark Step 4 complete. Then update the
-todo list: mark Step 4 complete, set Step 5 to in_progress. Read
-`guides/STEP_5_INIT.md` and proceed to Step 5.
+On confirm, update `.d2c/STATE.md` to mark Step 5 complete. Read
+`guides/STEP_6_INIT.md` to generate AGENTS.md, PLAN.md, ASSETS.md, and PLAYBOOK.md.

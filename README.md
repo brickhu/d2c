@@ -88,15 +88,17 @@ cd my-project
 
 After processing a design, D2C produces these context files in your project:
 
-| File | What it contains |
-|------|-----------------|
-| `.d2c/DESIGN.md` | Design tokens + behavioral constraints + responsive breakpoints + design URL. Documentation only. |
-| `.d2c/AGENTS_bak.md` | Authoritative copy for D2C resume/reference | Step 3 (copy) |
-| `.d2c/SPEC.md` | Component tree, API contracts, DB schema, state patterns, testing strategy, a11y/security |
-| `.d2c/ASSETS.md` | Image & animation asset manifest with local paths |
-| `PLAN.md` | Atomic task list (frontend → backend → testing → deploy) |
-| `.d2c/PLAYBOOK.md` | Execution roadmap — env vars, implementation phases, deployment steps |
-| `.env.example` | Developer onboarding env template |
+| File | What it contains | Step |
+|------|-----------------|------|
+| `.d2c/OVERVIEW.md` | Project name, type, purpose, audience, meta, design source URL | Step 1 |
+| `.d2c/PRD.md` | Business goals, feature scope, user flows, page structure, success criteria | Step 2 |
+| `.d2c/DESIGN.md` | Design tokens, components, animation, constraints, responsive breakpoints. Documentation only. | Step 3 |
+| `.d2c/ARC.md` | Frontend + backend tech stack, deployment strategy, architecture decisions. Keep it simple. | Step 4 |
+| `.d2c/SPEC.md` | File structure, env vars, API contracts, component tree, coding constraints, testing strategy | Step 5 |
+| `AGENTS.md` | Project context index (root) — auto-detected by AI coding tools | Post-5-step |
+| `.d2c/AGENTS_bak.md` | D2C resume copy | Post-5-step |
+| `PLAN.md` | Atomic development task list (code → test → deploy) | Post-5-step |
+| `.d2c/PLAYBOOK.md` | Execution roadmap — env vars, phases, handoff guide | Post-5-step |
 
 **Coverage dimension:** Full-stack — frontend UI, backend API, data models, infrastructure.
 
@@ -122,34 +124,17 @@ All commands are used **inside your AI coding tool's chat** after D2C is install
 ## How It Works
 
 ```
-Input: Figma URL / .fig / image / website URL / natural language
-           │
-           ▼
-  ┌───────────────────────────────────────────────┐
-  │  Phase 1: Context Generation (always runs)    │
-  │                                               │
-  │  Step 1 → STATE.md (diagnosis + conflicts)    │
-  │  Step 2 → DESIGN.md (design tokens + constraints)           │
-  │  Step 3 → AGENTS.md (architecture decisions)   │
-  │  Step 4 → SPEC.md (components + API + DB +    │
-  │            states + a11y + security)            │
-  │  Step 5 → ASSETS.md + PLAN.md + PLAYBOOK.md   │
-  │            + .env.example                      │
-  │                                               │
-  │  Output: Full-stack system context            │
-  │  covering UI → API → Data → Infrastructure    │
-  └───────────────────────────────────────────────┘
-           │ (user-triggered via /d2c code|test|deploy)
-           ▼
-  ┌───────────────────────────────────────────────┐
-  │  Phase 2: Execution (on demand)               │
-  │  /d2c code  → Implementation                  │
-  │  /d2c test  → Test generation                 │
-  │  /d2c deploy→ Deployment                      │
-  └───────────────────────────────────────────────┘
-           ▲
-           └── context modification at any point
-               (/d2c <natural language>)
+/d2c <input>
+  │
+  ├─ detect: Figma URL / website URL / image / file
+  │
+  ├─ Step 1: OVERVIEW.md — project meta
+  ├─ Step 2: PRD.md — business requirements
+  ├─ Step 3: DESIGN.md — design system & tokens
+  ├─ Step 4: ARC.md — architecture & tech stack
+  ├─ Step 5: SPEC.md — development spec & constraints
+  │
+  └─ Post-5-step: AGENTS.md + PLAN.md + PLAYBOOK.md + ASSETS.md
 ```
 
 ---
@@ -171,11 +156,11 @@ cd ~/Projects/dashboard-app
 # D2C detects: empty project → auto-enters Step 1
 
 # ── 4. Go through 5 guided steps (AI asks, you answer) ──
-# Step 1: Project survey → diagnosis report
-# Step 2: Token extraction → DESIGN.md (documentation only)
-# Step 3: Architecture Q&A (full-stack) → AGENTS.md
-# Step 4: Component tree + API contracts + DB schema → SPEC.md
-# Step 5: Assets + PLAN.md + PLAYBOOK.md + .env.example
+# Step 1: Project overview → .d2c/OVERVIEW.md (meta, type, audience)
+# Step 2: Business requirements → .d2c/PRD.md (goals, features, flows)
+# Step 3: Design system → .d2c/DESIGN.md (tokens, components, animation)
+# Step 4: Architecture → .d2c/ARC.md (tech stack, deployment)
+# Step 5: Development spec → .d2c/SPEC.md (file structure, env vars, API)
 
 # ── 5. Context complete! Modify anytime ──
 > /d2c use MongoDB instead of PostgreSQL
