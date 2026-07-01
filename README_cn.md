@@ -3,6 +3,7 @@
 > 将设计文件或线上网页转换为结构化的全栈 AI 开发上下文。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![skills.sh](https://skills.sh/b/brickhu/d2c)](https://skills.sh/brickhu/d2c)
 
 <p align="center">
   <a href="README.md">English</a> · <a href="#readme">中文</a>
@@ -43,6 +44,19 @@ npx skills add https://github.com/brickhu/d2c
 `skills` CLI 会自动检测你的 AI 编码工具环境，并将 skill 文件安装到正确的目录：
 
 > **💡 提示：** `skills` 安装器是一个零依赖的 CLI 工具。如果你之前没用过，`npx` 会自动下载并缓存——无需全局安装。
+
+### 手动安装（适用于不支持 `npx skills add` 的 harness 客户端）
+
+部分 AI 编码工具（如 WorkBuddy）可能不支持 `npx skills add` 命令。针对这些环境，可直接下载 ZIP 包后以自定义 skill 的形式上传：
+
+```bash
+# 下载 ZIP 包
+curl -L -o d2c.zip https://github.com/brickhu/d2c/archive/refs/heads/main.zip
+```
+
+然后在你的 AI 编码工具中，通过"添加自定义 Skill"或"导入 Skill"界面直接上传 `d2c.zip` 文件即可——无需提前解压。
+
+> **📦 ZIP 包含内容：** D2C skill 定义、全部工作流指南（步骤一到五）、辅助脚本（`d2c-status.js`、`d2c-fetch.js` 等）以及本 README——运行完整 D2C 工作流所需的一切。
 
 ---
 

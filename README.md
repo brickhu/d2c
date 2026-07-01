@@ -3,6 +3,7 @@
 > Translate design files or live websites into structured full-stack AI development context.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![skills.sh](https://skills.sh/b/brickhu/d2c)](https://skills.sh/brickhu/d2c)
 
 <p align="center">
   <a href="#readme">English</a> · <a href="README_cn.md">中文</a>
@@ -43,6 +44,19 @@ npx skills add https://github.com/brickhu/d2c
 The `skills` CLI automatically detects your AI coding tool environment and places the skill files in the correct directory:
 
 > **💡 Tip:** The `skills` installer is a zero-dependency CLI tool. If you haven't used it before, `npx` will download and cache it automatically — no global install needed.
+
+### Manual Install (for harness clients that don't support `npx skills add`)
+
+Some AI coding harness clients (e.g. WorkBuddy) may not support the `npx skills add` command. For those environments, download the ZIP archive and upload it directly as a custom skill:
+
+```bash
+# Download the ZIP archive
+curl -L -o d2c.zip https://github.com/brickhu/d2c/archive/refs/heads/main.zip
+```
+
+Then, in your AI coding tool, upload the `d2c.zip` file through the "Add Custom Skill" or "Import Skill" interface — no need to unzip beforehand.
+
+> **📦 Contents of the ZIP:** Includes the D2C skill definition, all workflow guides (Steps 1-5), helper scripts (`d2c-status.js`, `d2c-fetch.js`, etc.), and this README — everything you need to run the full D2C workflow.
 
 ---
 
