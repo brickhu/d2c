@@ -164,7 +164,7 @@ Figma REST API or inspect the file structure.**
 | Outcome | Action |
 |---------|--------|
 | ✅ Clearly Web / iOS / Android / Desktop | Continue to 1f (Mismatch Detection) |
-| ⚠️ Ambiguous signals | AskUserQuestion for confirmation |
+| ⚠️ Ambiguous signals | Use AskUserQuestion: `{ header: "Design Type", question: "What type of application is this design for?", options: [{ label: "Web App", "description": "Browser-based, responsive" }, { label: "iOS App", "description": "iPhone/iPad native" }, { label: "Android App", "description": "Android native" }, { label: "Desktop App", "description": "macOS/Windows/Linux" }] }` |
 | ❌ Not one of the four types, or unparseable | Execute rejection, terminate |
 
 Rejection output (no files created):
@@ -204,26 +204,15 @@ mismatch exists when:
 If `project.isEmpty` or no framework was detected, skip this check — there is
 nothing to mismatch against.
 
-When a mismatch is detected, present:
+When a mismatch is detected, use AskUserQuestion:
 
-```
-⚠️  D2C Design-Project Mismatch
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Design type:  {design_type}
-  Project type: {detected_project_type}
-  Evidence:     {specific files/signals}
-
-  The design appears to be for {design_type}, but this directory
-  contains an existing {detected_project_type} project.
-
-  How would you like to proceed?
-  1. Adapt code to design — restructure project to match
-     (may involve significant changes to existing setup)
-  2. Adapt design to project — implement the design's visual
-     style within the existing {detected_project_type} platform
-  3. Proceed anyway — flag as risk, I'll handle it manually
-  4. Cancel
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```json
+{ "header": "Resolve", "question": "Design type ({design_type}) conflicts with project type ({detected_project_type}). How to proceed?", "options": [
+  { "label": "Adapt Code to Design", "description": "Restructure/reconfigure the project to match the design platform" },
+  { "label": "Adapt Design to Project", "description": "Implement the design's visual style within the existing {detected_project_type} platform" },
+  { "label": "Proceed Anyway", "description": "Flag as risk, I'll handle the mismatch manually" },
+  { "label": "Cancel", "description": "Abort D2C" }
+]}
 ```
 
 Wait for the user's choice and note it in the diagnostic report under "Key
@@ -285,8 +274,21 @@ resolutions:
 
 ## 1h. Request Confirmation
 
-Use AskUserQuestion to confirm or adjust. Create `.d2c/` directory if it
-doesn't exist, then write `.d2c/STATE.md`:
+Use AskUserQuestion to confirm the diagnostic report:
+
+```json
+{ "header": "Confirm", "question": "Diagnostic report ready. Review and confirm?", "options": [
+  { "label": "Confirm & Continue", "description": "Proceed to Step 2 — Extract Design Tokens" },
+  { "label": "Change Design Type", "description": "The detected design type is incorrect" },
+  { "label": "Cancel", "description": "Abort D2C" }
+]}
+```
+
+If user chooses "Change Design Type", re-prompt with the Design Type selector.
+Otherwise on confirm, create `.d2c/` directory if it doesn't exist, then write
+`.d2c/STATE.md`.
+
+Then update the todo list: mark Step 1 complete, set Step 2 to in_progress.
 
 ```markdown
 # D2C Workflow

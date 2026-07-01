@@ -216,6 +216,8 @@ tell the user to run `/d2c <design>` first.
 
 ### Smart Entry Flow (`/d2c <input>`)
 
+**Step 0:** Initialize the todo list immediately (see Todo-Driven Workflow above).
+
 The entry flow has two branches based on input type:
 
 **Branch A — Design Input:** Input is a Figma URL, file path, or screenshot.
@@ -224,25 +226,50 @@ Run `scripts/d2c-status.js <design-url>` and branch on the result:
 1. **`skipMenu: true` + `autoAction: "init"`** — Empty directory or existing
    project without D2C state. Silently proceed to Step 1 (init flow). Briefly
    note the detected project state so the user knows what was found.
-2. **`showWarning: true` + `warningType: "context_switch"`** — The provided
-   design differs from the stored one. Show a brief warning that the current
-   `.d2c/` will be backed up to `.d2c.bak/`, then confirm and proceed to Init.
-3. **`showWarning: true` + `warningType: "orphan_backup"`** — `.d2c.bak/`
-   exists but no active `.d2c/`. Present options: (1) restore from backup and
-   resume, (2) start fresh (keep backup), (3) start fresh (delete backup),
-   (4) cancel.
-4. **`availableCount >= 2`** (resume case — init/update/sync all available) —
-   Present the full option menu using the labels and reasons from the JSON.
-   Mark the `recommended` option. Let the user choose.
 
-After the user's choice (or auto-selection), dispatch:
+2. **`showWarning: true` + `warningType: "context_switch"`** — The provided
+   design differs from the stored one. Use AskUserQuestion:
+   ```json
+   { "header": "Context Switch", "question": "New design detected. Backup current .d2c/ → .d2c.bak/?", "options": [
+     { "label": "Backup & Start Fresh", "description": "Save current context, start new D2C run" },
+     { "label": "Cancel", "description": "Keep current context, abort" }
+   ]}
+   ```
+
+3. **`showWarning: true` + `warningType: "orphan_backup"`** — `.d2c.bak/`
+   exists but no active `.d2c/`. Use AskUserQuestion:
+   ```json
+   { "header": "Restore", "question": "Found backup .d2c.bak/. What would you like to do?", "options": [
+     { "label": "Restore & Resume", "description": "Restore backup, continue from where you left off" },
+     { "label": "Start Fresh (Keep Backup)", "description": "New D2C run, keep backup for reference" },
+     { "label": "Start Fresh (Delete Backup)", "description": "New D2C run, discard old backup" },
+     { "label": "Cancel", "description": "Do nothing" }
+   ]}
+   ```
+
+4. **`availableCount >= 2`** (resume case — init/update/sync all available) —
+   Use AskUserQuestion with the `recommended` option marked:
+   ```json
+   { "header": "Action", "question": "Existing D2C state found. What do you want to do?", "options": [
+     { "label": "Update Design (Recommended)", "description": "Resume from step {current}, iterate on design" },
+     { "label": "Start Fresh", "description": "Backup current .d2c/ and start over" },
+     { "label": "Sync to Figma", "description": "Push style changes back to Figma" }
+   ]}
+   ```
+
+After the user's choice, dispatch:
 - **init** → read `guides/INIT.md` (steps 1-3 for backup/cleanup), then proceed to Step 1
 - **update** → read `guides/UPDATE.md`, then resume from the recorded step per Resume Rules
 - **sync** → read `guides/SYNC.md` and execute
 
-**If `inputType` is `website`:** The input is a website URL. The Agent confirms
-with the user, then reads `guides/WEBSITE_INPUT.md` and follows the crawling
-pipeline. After crawling, feeds the output into Step 2 and proceeds normally.
+**If `inputType` is `website`:** Insert todo "Crawl website → crawled.json", then use AskUserQuestion:
+```json
+{ "header": "Website", "question": "This is a website URL. I'll crawl it to extract design tokens. Continue?", "options": [
+  { "label": "Crawl & Analyze", "description": "Crawl {url}, extract tokens, DOM, screenshots" },
+  { "label": "Cancel", "description": "Do nothing" }
+]}
+```
+On confirm, follow `guides/WEBSITE_INPUT.md`. After crawling, feed into Step 2.
 
 **Branch B — Natural Language Input:** Input is NOT a known command, NOT a
 design input, NOT a website URL, AND `.d2c/STATE.md` exists. Route to context
@@ -250,8 +277,69 @@ modification mode.
 
 Read `guides/CONTEXT_MODIFY.md` and follow its workflow.
 
-If `.d2c/STATE.md` does NOT exist and input is unrecognizable, ask the user
-whether they want to start a new project (`/d2c init`) or provide a design.
+If `.d2c/STATE.md` does NOT exist and input is unrecognizable, use AskUserQuestion:
+```json
+{ "header": "Start", "question": "No D2C project found. How would you like to start?", "options": [
+  { "label": "Start New Project", "description": "Provide a Figma URL, screenshot, or website URL" },
+  { "label": "Cancel", "description": "Do nothing" }
+]}
+```
+
+## Todo-Driven Workflow (MANDATORY)
+
+D2C uses TodoWrite to display progress as a structured task list. After every
+step, the Agent updates the todo list — this is **mandatory** so the user can
+see where they are at a glance.
+
+**When to update todos:**
+- **Step started** → Set status to `in_progress`
+- **Step completed** → Set status to `completed`, include summary of what was done
+- **New sub-tasks discovered** → Add them (e.g., MCP setup, skill recommendations)
+
+**Standard todo list for a fresh D2C run:**
+
+```json
+[
+  { "id": "1", "content": "Step 1: Project Survey & Diagnosis", "status": "in_progress", "priority": "high" },
+  { "id": "2", "content": "Step 2: Extract Design Tokens → DESIGN.md", "status": "pending", "priority": "high" },
+  { "id": "3", "content": "Step 3: Architecture Alignment → AGENTS.md", "status": "pending", "priority": "high" },
+  { "id": "4", "content": "Step 4: Spec & Component Mapping → SPEC.md", "status": "pending", "priority": "high" },
+  { "id": "5", "content": "Step 5: Assets & Plan → ASSETS.md + PLAN.md + PLAYBOOK.md", "status": "pending", "priority": "high" }
+]
+```
+
+**Dynamically inserted sub-tasks** (when a trigger is hit):
+
+| Trigger | Inserted Todo |
+|---------|--------------|
+| MCP not configured | `"Configure Figma MCP (auto-setup)"` |
+| Website URL input | `"Crawl website → crawled.json"` |
+| Skill recommendation | `"Install {skill-name} (optional)"` |
+| Conflict detected | `"Resolve design vs. project conflict"` |
+
+**Completion summary:** When all Phase 1 tasks are done, use the summary field
+to list what was generated. Then ask the user if they want to proceed to Phase 2
+(code generation) — use AskUserQuestion, not free text.
+
+## Decision UI (MANDATORY)
+
+All user decisions MUST use AskUserQuestion. Never ask the user to type
+answers manually. This applies to every choice point in the workflow:
+
+| Decision Point | AskUserQuestion Format |
+|---------------|----------------------|
+| Smart Entry menu | `header: "Action"`, options: init/update/sync + recommended |
+| Design type confirmation | `header: "Design Type"`, options: Web/iOS/Android/Desktop |
+| Conflict resolution | `header: "Resolve"`, options: adapt-code/adapt-design/proceed/cancel |
+| MCP setup | `header: "MCP Setup"`, options: "Auto-configure"/"Skip" |
+| Tech stack choices | `header: "Framework"`, options: detected frameworks |
+| Gap decisions | `header: "Auth"`, options: NextAuth/Clerk/Custom/None |
+| Skill recommendations | `header: "Install"`, options: install/skip per skill |
+| Step confirmation | `header: "Continue"`, options: "Confirm & Next"/"Modify" |
+
+**Rule:** If the user needs to make a choice, use AskUserQuestion. If the user
+needs to confirm output, use AskUserQuestion. Never fall back to "type your
+answer".
 
 ## Workflow
 
@@ -272,11 +360,15 @@ Each step has a detailed execution guide in the `guides/` directory.
 | **4** | Coding Standards & Component Mapping | `.d2c/SPEC.md` (directory structure, component tree, constraints, testing strategy) ★ | `guides/STEP_4_SPEC.md` |
 | **5** | Init, Assets & Plan | Scaffold (if needed) + downloaded assets + `.d2c/ASSETS.md` + `PLAN.md` + **`.d2c/PLAYBOOK.md`** (execution roadmap covering code → test → deploy) | `guides/STEP_5_INIT.md` |
 
-**Flow:** Dispatch → (init backup/cleanup if needed) → Step 1 → read guide →
-execute → confirm → Step 2 → read guide → execute → confirm → ... → Step 5.
+**Flow:** Dispatch → init todos → (init backup/cleanup if needed) → Step 1 →
+read guide → execute → AskUserQuestion confirm → Step 2 → read guide → execute
+→ AskUserQuestion confirm → ... → Step 5.
 
-After Step 5 completes, all context files are ready. The user may choose to
-stop here and let a Code Agent consume the context, or proceed to Phase 2.
+After each step: update TodoWrite to mark it complete, move the next to
+in_progress.
+
+After Step 5 completes, all context files are ready. Use AskUserQuestion to
+ask whether to proceed to Phase 2 or stop.
 
 ### Phase 2: Optional — Code Generation & Deployment (Steps 6-7, user-triggered)
 

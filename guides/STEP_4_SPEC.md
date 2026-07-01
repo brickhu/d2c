@@ -562,10 +562,26 @@ ls .trae/skills/ 2>/dev/null || ls .traecli/skills/ 2>/dev/null
 | `code-reviewer` (Google) | Code quality review across all dimensions | `npx skills add google-gemini/gemini-cli --skill code-reviewer` |
 | `web-design-guidelines` (Vercel) | Design + accessibility audit for generated UI | `npx skills add vercel-labs/agent-skills --skill web-design-guidelines` |
 
-For each uninstalled skill, show the command. Invoke installed skills only
-after user confirmation.
+For each uninstalled skill, use AskUserQuestion:
+```json
+{ "header": "Install", "question": "Install {skill-name}? {description}", "options": [
+  { "label": "Install", "description": "{install-command}" },
+  { "label": "Skip", "description": "Don't install this skill" }
+]}
+```
 
-## After completion
+## After Completion
 
-Write `.d2c/SPEC.md`, update `.d2c/STATE.md`, then read
-`guides/STEP_5_INIT.md` and proceed to **Step 5**.
+Use AskUserQuestion to confirm the SPEC.md output:
+
+```json
+{ "header": "Confirm", "question": "SPEC.md is ready. Review and confirm?", "options": [
+  { "label": "Confirm & Continue", "description": "Proceed to Step 5 — Assets, Plan & Playbook" },
+  { "label": "Modify", "description": "I want to adjust the spec" },
+  { "label": "Cancel", "description": "Abort D2C" }
+]}
+```
+
+On confirm, update `.d2c/STATE.md` to mark Step 4 complete. Then update the
+todo list: mark Step 4 complete, set Step 5 to in_progress. Read
+`guides/STEP_5_INIT.md` and proceed to Step 5.

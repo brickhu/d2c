@@ -282,39 +282,18 @@ with "No changes from v{number}."
 
 ## After Completion
 
-Update `.d2c/STATE.md`, then present the PLAYBOOK.md summary to the user:
+Use AskUserQuestion to confirm the plan and playbook:
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  D2C Context Generation Complete — {Project Name}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-✅ All context files generated:
-  • Design tokens   → .d2c/DESIGN.md (documentation only)
-  • Design spec     → .d2c/DESIGN.md
-  • Project index   → AGENTS.md
-  • Component spec  → .d2c/SPEC.md (UI tree + API contracts + DB schema + state patterns)
-  • Task plan       → PLAN.md ({N} tasks)
-  • Playbook        → .d2c/PLAYBOOK.md
-  • Env template    → .env.example
-
-🧩 Context coverage:
-  • Frontend UI     → Components, states, tokens, a11y
-  • Backend API     → Endpoints, contracts, error format, auth
-  • Data            → Schema, migrations, relations, indexes
-  • Infrastructure  → Deployment, env vars, security baselines
-
-📋 Next steps (see PLAYBOOK.md for details):
-  1. Set up environment variables listed in Prerequisites
-  2. Run `/d2c code`   → Start implementation
-  3. Run `/d2c test`   → Generate test suites
-  4. Run `/d2c deploy` → Set up deployment
-
-Context files are ready. What would you like to do?
-  (A) Review the playbook first
-  (B) Run `/d2c code` to start implementing
-  (C) Stop here — I'll use the context with another tool
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```json
+{ "header": "Confirm", "question": "PLAN.md, PLAYBOOK.md and ASSETS.md are ready. All Phase 1 context files generated.", "options": [
+  { "label": "Confirm & Done", "description": "Phase 1 complete. Context files are ready for code agents." },
+  { "label": "Start Code Generation", "description": "Proceed to Phase 2 — Step 6 code generation" },
+  { "label": "Modify", "description": "I want to adjust the plan" }
+]}
 ```
 
-Wait for user decision before proceeding.
+On confirm, update `.d2c/STATE.md` to mark Step 5 complete. Then update the
+todo list: mark Step 5 complete with a summary of all generated files.
+
+If user chose "Start Code Generation", add Step 6 and Step 7 to the todo list
+and read `guides/STEP_6_CODE.md`.

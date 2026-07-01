@@ -247,29 +247,29 @@ After the tech stack is confirmed, check the project's installed skills and
 suggest complementary ones. See the **Skill Interoperability** section in
 SKILL.md for the full protocol.
 
-**Quick check:**
+The Agent checks installed skills and uses AskUserQuestion for each recommendation found:
 
-```bash
-ls .trae/skills/ 2>/dev/null || ls .traecli/skills/ 2>/dev/null
+```json
+{ "header": "Install", "question": "Install frontend-design (Anthropic)? Premium UI quality, 190K+ installs.", "options": [
+  { "label": "Install", "description": "npx skills add anthropics/skills --skill frontend-design" },
+  { "label": "Skip", "description": "Don't install this skill" }
+]}
 ```
 
-Based on the confirmed tech stack, recommend:
-
-| Tech Stack | Recommended Skills |
-|-----------|-------------------|
-| React / Next.js | `frontend-design` (Anthropic), `frontend-react-best-practices`, `web-design-guidelines` (Vercel) |
-| Any web project | `huashu-design` — generate design mockups from text descriptions |
-| Full-stack project | `code-reviewer` (Google) — catch issues before code generation |
-
-For each uninstalled skill, show the install command:
-
-> "Tip: `frontend-design` (Anthropic, 190K+ installs) adds premium UI quality
-> to generated code. Install with:
-> `npx skills add anthropics/skills --skill frontend-design`"
-
-Invoke installed skills only after user confirmation.
+For each uninstalled skill, show the ask. For installed skills, ask if they want to invoke it.
 
 ## After Completion
 
-Update `.d2c/STATE.md`, then read `guides/STEP_4_SPEC.md` and proceed to
-**Step 4**.
+Use AskUserQuestion to confirm:
+
+```json
+{ "header": "Confirm", "question": "AGENTS.md is ready. Review and confirm?", "options": [
+  { "label": "Confirm & Continue", "description": "Proceed to Step 4 — Coding Standards & Specs" },
+  { "label": "Modify", "description": "I want to change some decisions" },
+  { "label": "Cancel", "description": "Abort D2C" }
+]}
+```
+
+On confirm, update `.d2c/STATE.md` to mark Step 3 complete. Then update the
+todo list: mark Step 3 complete, set Step 4 to in_progress. Read
+`guides/STEP_4_SPEC.md` and proceed to Step 4.

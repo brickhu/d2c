@@ -168,5 +168,17 @@ confirmation. Preserve old values for reference.
 
 ## After Completion
 
-Update `.d2c/STATE.md` to mark Step 2 complete, then read
-`guides/STEP_3_ARCHITECTURE.md` and proceed to **Step 3**.
+Use AskUserQuestion to confirm the DESIGN.md output:
+
+```json
+{ "header": "Confirm", "question": "DESIGN.md is ready. Review and confirm?", "options": [
+  { "label": "Confirm & Continue", "description": "Proceed to Step 3 — Architecture Alignment" },
+  { "label": "Modify", "description": "I want to adjust some token values" },
+  { "label": "Cancel", "description": "Abort D2C" }
+]}
+```
+
+If user chooses "Modify", ask what they want to change and update DESIGN.md.
+On confirm, update `.d2c/STATE.md` to mark Step 2 complete. Then update the
+todo list: mark Step 2 complete, set Step 3 to in_progress. Read
+`guides/STEP_3_ARCHITECTURE.md` and proceed to Step 3.
