@@ -68,44 +68,38 @@ Priority 1 — Figma MCP (try first, zero config)
   figma_getImage) to check if a Figma MCP is installed. If it responds,
   use MCP output — richer data, no token, no export, no file download.
 
-Priority 2 — MCP setup (one-time, 1 minute) ⭐ RECOMMENDED
-────────────────────────────────────────────────────────────
-  If no Figma MCP is detected, guide the user through setup. Most code
-  harnesses support MCP natively — it's just a few lines of JSON config.
+Priority 2 — MCP auto-setup (one click, 5 seconds) ⭐ RECOMMENDED
+───────────────────────────────────────────────────────────────────
+  If no Figma MCP is detected, run the auto-setup script to detect the
+  harness and write the config:
 
-  Show the user this message:
+  ```bash
+  node <skill-dir>/scripts/d2c-mcp-setup.js --dry-run
+  ```
 
-  > "Figma MCP is not configured yet. It takes 1 minute to set up and
-  > requires no token — just a JSON config entry. After setup, restart
-  > your code harness and re-run `/d2c`.
-  >
-  > **For TRAE IDE / TRAE CLI:**
-  >   Settings → MCP → Add Server, or create .trae/mcp.json:
-  >   ```json
-  >   {
-  >     "mcpServers": {
-  >       "figma": {
-  >         "command": "npx",
-  >         "args": ["-y", "@anthropic/figma-mcp"]
-  >       }
-  >     }
-  >   }
-  >   ```
-  >
-  > **For Claude Code:**
-  >   Create or edit ~/.claude/mcp.json with the same JSON above.
-  >
-  > **For Cursor / Windsurf:**
-  >   Create or edit .cursor/mcp.json or .windsurf/mcp.json with the
-  >   same JSON above.
-  >
-  > After setup, restart your code harness and re-run `/d2c <figma-url>`.
-  >
-  > Want to skip MCP and use a plugin export (.fig file) instead?"
+  Parse the JSON output. Use AskUserQuestion to confirm:
 
-  If the user chooses to set up MCP, terminate the current run and tell
-  them to re-run `/d2c` after restarting their harness. If they choose to
-  skip, proceed to Priority 3.
+  > "Figma MCP is not configured yet. I can set it up automatically —
+  >   just add a few lines to your MCP config file.
+  > 
+  >   Harness: TRAE IDE / CLI
+  >   Config file: .trae/mcp.json
+  > 
+  >   After setup, restart your harness and re-run `/d2c <figma-url>`.
+  > 
+  >   Proceed with auto-configuration?"
+
+  If the user confirms: run without --dry-run:
+  ```bash
+  node <skill-dir>/scripts/d2c-mcp-setup.js
+  ```
+  Then tell the user to restart their harness and re-run `/d2c`. Terminate
+  the current run. Do NOT proceed to Priority 3.
+
+  If the user declines: proceed to Priority 3.
+
+  If the script returns `action: "no_harness_detected"`: show the manual
+  JSON config for the most likely harness based on context.
 
 Priority 3 — Plugin export (.fig file, no token)
 ──────────────────────────────────────────────────

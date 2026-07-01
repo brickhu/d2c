@@ -84,38 +84,31 @@ Priority 1 — Figma MCP (zero config, zero token)
   figma_getImage) to check if a Figma MCP is installed. If it responds
   successfully, use MCP output directly — richer data, no token, no export.
 
-Priority 2 — MCP setup (one-time, 1 minute)
-─────────────────────────────────────────────
-  If no Figma MCP is detected, guide the user through setup. Most code
-  harnesses support MCP natively — it's just a JSON config entry:
+Priority 2 — MCP auto-setup (one click, 5 seconds)
+──────────────────────────────────────────────────
+  If no Figma MCP is detected, run the auto-setup script:
 
-  TRAE IDE / TRAE CLI:
-    Settings → MCP → Add Server, or create .trae/mcp.json:
-    {
-      "mcpServers": {
-        "figma": {
-          "command": "npx",
-          "args": ["-y", "@anthropic/figma-mcp"]
-        }
-      }
-    }
+  ```bash
+  node <skill-dir>/scripts/d2c-mcp-setup.js
+  ```
 
-  Claude Code:
-    Create or edit ~/.claude/mcp.json:
-    {
-      "mcpServers": {
-        "figma": {
-          "command": "npx",
-          "args": ["-y", "@anthropic/figma-mcp"]
-        }
-      }
-    }
+  The script auto-detects which code harness is running (TRAE / Claude
+  Code / Cursor / Windsurf) and writes the MCP config to the correct file.
+  The Agent then uses AskUserQuestion to confirm:
 
-  Cursor / Windsurf:
-    Create or edit .cursor/mcp.json or .windsurf/mcp.json with the same
-    structure as above.
+  > "Figma MCP is not configured. I can add it automatically for you.
+  >  Target: {harness_name} → {config_path}
+  >  After setup, restart your harness and re-run `/d2c`.
+  > 
+  >  Proceed with auto-configuration?"
 
-  After setup, restart the code harness. The Agent then retries Priority 1.
+  If the user confirms: run the script (without --dry-run), then tell
+  them to restart the harness and re-run `/d2c`. Do NOT proceed to
+  Priority 3 — MCP is the best path.
+  If the user declines: proceed to Priority 3.
+
+  If the script detects no harness (`action: "no_harness_detected"`),
+  fall back to manual instructions — show the user which JSON to add.
 
 Priority 3 — Plugin export (.fig file, no token)
 ──────────────────────────────────────────────────
