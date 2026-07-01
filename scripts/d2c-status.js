@@ -238,6 +238,41 @@ function normalizeUrl(url) {
   }
 }
 
+// ── Input type detection ────────────────────────────────────────────────────
+
+function detectInputType(inputUrl) {
+  if (!inputUrl) return 'none';
+
+  const url = inputUrl.toLowerCase();
+
+  // Figma
+  if (url.includes('figma.com/file/') || url.includes('figma.com/design/')) {
+    return 'figma';
+  }
+
+  // Penpot
+  if (url.includes('penpot.app/') || url.includes('design.penpot.app/')) {
+    return 'penpot';
+  }
+
+  // Local design files
+  if (url.endsWith('.fig') || url.endsWith('.sketch')) {
+    return 'file';
+  }
+
+  // Image files
+  if (/\.(png|jpg|jpeg|gif|webp|svg|bmp)$/i.test(url)) {
+    return 'image';
+  }
+
+  // Website URL (http/https)
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return 'website';
+  }
+
+  return 'unknown';
+}
+
 // ── Backup detection ────────────────────────────────────────────────────────
 
 function detectBackups() {
@@ -377,6 +412,7 @@ function main() {
   const result = {
     cwd,
     timestamp: new Date().toISOString(),
+    inputType: detectInputType(inputDesignUrl),
     project,
     state,
     backups,

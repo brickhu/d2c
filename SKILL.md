@@ -57,6 +57,7 @@ The script outputs a JSON object with:
 
 | Field | Meaning |
 |-------|---------|
+| `inputType` | Detected input type: `figma`, `penpot`, `file`, `image`, `website`, `none`, or `unknown` |
 | `project` | Detected framework, language, styling, package manager, deploy target, existing components |
 | `state` | `.d2c/` existence, current step, stored design URL, whether the input URL matches |
 | `backups` | `.d2c.bak/`, `.d2c.restart.bak/`, orphan backup detection |
@@ -212,8 +213,13 @@ After the user's choice (or auto-selection), dispatch:
 - **update** → read `guides/UPDATE.md`, then resume from the recorded step per Resume Rules
 - **sync** → read `guides/SYNC.md` and execute
 
+**If `inputType` is `website`:** The input is a website URL. The Agent confirms
+with the user, then reads `guides/WEBSITE_INPUT.md` and follows the crawling
+pipeline. After crawling, feeds the output into Step 2 and proceeds normally.
+
 **Branch B — Natural Language Input:** Input is NOT a known command, NOT a
-design input, AND `.d2c/STATE.md` exists. Route to context modification mode.
+design input, NOT a website URL, AND `.d2c/STATE.md` exists. Route to context
+modification mode.
 
 Read `guides/CONTEXT_MODIFY.md` and follow its workflow.
 
