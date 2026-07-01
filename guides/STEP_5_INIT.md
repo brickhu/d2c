@@ -66,10 +66,10 @@ Download all image and animation nodes identified in Step 1.
 
 **Option A — Figma MCP:** Use `figma_getImage({file_key, ids: [...], format: "svg"})`.
 
-**Option B — REST API:**
+**Option B — Via MCP / REST API:**
 ```
 GET https://api.figma.com/v1/images/{file_key}?ids={ids}&format=svg
-Headers: X-Figma-Token: {token}
+Headers: X-Figma-Token: {token}  (handled by MCP if using MCP)
 ```
 
 **SVG-first** for icons and simple graphics. Photos use PNG/JPG.

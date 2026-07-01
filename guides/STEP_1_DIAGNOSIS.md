@@ -58,55 +58,87 @@ SKILL.md.
 
 ## 1c. Design Data Source Selection
 
-Applies only to **Figma URL** inputs. Choose the data source by priority:
+Applies only to **Figma URL** inputs. Choose the data source by priority.
+**Never ask the user for a Figma Personal Access Token.** MCP replaces it.
 
 ```
-Priority 1 — Figma MCP (zero config, Agent level)
-────────────────────────────────────────────────────
-  Use tools/list (or attempt to call figma_getFile / figma_getNode /
-  figma_getImage) to check if a Figma MCP is installed. If it responds
-  successfully, use MCP output as the data source — no Token, no export,
-  no file download needed.
-
-Priority 2 — figma-to-json plugin (user exports .fig file)
-────────────────────────────────────────────────────────────
-  If no MCP, suggest the user install the figma-to-json plugin
-  (https://github.com/yagudaev/figma-to-json), open the design in Figma
-  Desktop, run the plugin, and export a .fig file.
-  
-  Then pass the .fig file to d2c-fetch.js (Layer 2 below).
-  No Token, no MCP setup — only a one-time plugin install.
-
-Priority 3 — d2c-fetch.js script (Node.js CLI)
+Priority 1 — Figma MCP (try first, zero config)
 ────────────────────────────────────────────────
-  Fallback: run the fetch script with the input URL and optional Token.
-  See 1d for details.
+  Use tools/list (or attempt to call figma_getFile / figma_getNode /
+  figma_getImage) to check if a Figma MCP is installed. If it responds,
+  use MCP output — richer data, no token, no export, no file download.
 
-Priority 4 — Screenshot (last resort)
-──────────────────────────────────────
-  No MCP, no plugin, no Token → take screenshots. D2C falls back to
-  multimodal vision for type validation and layout analysis.
+Priority 2 — MCP setup (one-time, 1 minute) ⭐ RECOMMENDED
+────────────────────────────────────────────────────────────
+  If no Figma MCP is detected, guide the user through setup. Most code
+  harnesses support MCP natively — it's just a few lines of JSON config.
+
+  Show the user this message:
+
+  > "Figma MCP is not configured yet. It takes 1 minute to set up and
+  > requires no token — just a JSON config entry. After setup, restart
+  > your code harness and re-run `/d2c`.
+  >
+  > **For TRAE IDE / TRAE CLI:**
+  >   Settings → MCP → Add Server, or create .trae/mcp.json:
+  >   ```json
+  >   {
+  >     "mcpServers": {
+  >       "figma": {
+  >         "command": "npx",
+  >         "args": ["-y", "@anthropic/figma-mcp"]
+  >       }
+  >     }
+  >   }
+  >   ```
+  >
+  > **For Claude Code:**
+  >   Create or edit ~/.claude/mcp.json with the same JSON above.
+  >
+  > **For Cursor / Windsurf:**
+  >   Create or edit .cursor/mcp.json or .windsurf/mcp.json with the
+  >   same JSON above.
+  >
+  > After setup, restart your code harness and re-run `/d2c <figma-url>`.
+  >
+  > Want to skip MCP and use a plugin export (.fig file) instead?"
+
+  If the user chooses to set up MCP, terminate the current run and tell
+  them to re-run `/d2c` after restarting their harness. If they choose to
+  skip, proceed to Priority 3.
+
+Priority 3 — Plugin export (.fig file, no token)
+──────────────────────────────────────────────────
+  If MCP setup is not possible (e.g., restricted environment), suggest
+  the figma-to-json plugin (https://github.com/yagudaev/figma-to-json).
+  User opens the design in Figma Desktop, runs the plugin, exports a .fig
+  file. Then pass the file to d2c-fetch.js. No token, no MCP setup.
+
+Priority 4 — Screenshot (last resort, multimodal vision)
+──────────────────────────────────────────────────────────
+  No MCP, no plugin → take screenshots. D2C falls back to multimodal
+  vision analysis — less detailed but zero setup.
 ```
 
-Use AskUserQuestion to confirm Plugin export (Priority 2) or request Token
-(Priority 3) if the user hasn't provided one. Do not silently attempt all
-paths — one at a time, with user awareness.
+Token-based fallback (`--token`) is only available as an undocumented
+escape hatch for environments where MCP and plugin are both unavailable.
+**Do not proactively suggest it.**
 
 ## 1d. Fetch Design Data
 
-Run the design data fetcher script with the input design (for Priority 3 and
-Priority 2 after .fig export):
+Run the design data fetcher script for Priority 3 (.fig/.sketch files) and
+Priority 4 (screenshots):
 
 ```bash
-node <skill-dir>/scripts/d2c-fetch.js <input> [--token <pat>]
+node <skill-dir>/scripts/d2c-fetch.js <input>
 ```
 
 For Priority 1 (MCP), no script is needed — the Agent calls MCP tools directly
 and formats the output to match the same JSON schema expected by the rest of
 the pipeline.
 
-The script auto-detects the input type (Figma URL / `.fig` file / `.sketch` file /
-image screenshot) and normalizes all outputs to the same JSON structure:
+The script auto-detects the input type (.fig / .sketch / image) and normalizes
+all outputs to the same JSON structure:
 
 | Output field | Purpose |
 |-------------|---------|
@@ -118,43 +150,6 @@ image screenshot) and normalizes all outputs to the same JSON structure:
 | `thumbnail` | Base64 preview image |
 | `error` | Error message if the fetch failed |
 | `meta.warnings` | Soft warnings (e.g., optional dep not installed) |
-
-**For Figma URLs (when falling back to script — Priority 3):**
-
-The script's Token resolution chain:
-1. **`--token <pat>`** CLI参数 → 优先级最高
-2. **`FIGMA_TOKEN`** 环境变量 → 自动兜底（用户 export 一次后无需每次传参）
-3. **两者皆无** → 脚本返回 `error` 字段
-
-When the script returns an error because no token was found:
-
-> 方案A：**Prompt 用户提供 Token**
->
-> The PAT is the **D2C operator's own token**, not the design file owner's.
-> The file must be shared (viewer or above) with the token owner's Figma account.
-> Token is used only for the current session, never persisted to disk.
->
-> 使用 AskUserQuestion 询问用户是否愿意生成 Token，并提供清晰的获取路径：
-> ```
-> Figma URL 需要 Personal Access Token 才能获取设计数据。
-> Token 生成很简单（1分钟）：
->   1. 打开 https://www.figma.com/settings
->   2. 找到 "Personal Access Tokens" → "Generate new token"
->   3. 选择 file_content:read 权限，复制 Token
->   4. 确保设计稿已共享给当前 Figma 账号
->
->   传入方式:
->     node d2c-fetch.js <url> --token figd_xxxxx
->     或 export FIGMA_TOKEN=figd_xxxxx（一次设置，后续自动）
->
->   愿意生成 Token 来获取完整数据吗？还是用截图方案？
-> ```
->
-> 方案B：**截图替代（无需 Token）**
->
-> If the user doesn't want to set up a Token, they can take screenshots of the
-> design and pass them to the script. D2C will fall back to multimodal vision
-> analysis in Step 1e (Type Validation) — less detailed but zero setup.
 
 **For `.fig` / `.sketch` files:**
 - The script unzips the file and decodes the internal format.

@@ -52,8 +52,7 @@ npx skills add https://github.com/brickhu/d2c
 |------|---------|------|
 | **Node.js** | >= 18 | 辅助脚本所需（`d2c-status.js`, `d2c-fetch.js`） |
 | **AI 编码工具** | 任意 | Claude Code、Cursor、Windsurf、TRAE IDE / CLI |
-| **Figma 账号** | 可选 | 仅当使用 Figma REST API 和 Personal Access Token 时需要 |
-| **Figma MCP** | 可选 | 支持的工具中可实现零配置 Figma 访问 |
+| **Figma MCP** | 推荐 | 零 token 的 Figma 访问——D2C 会在缺失时引导你完成配置 |
 
 ---
 

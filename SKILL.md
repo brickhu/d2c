@@ -71,31 +71,67 @@ The script outputs a JSON object with:
 
 **Always parse the JSON output** — do not manually LS or guess the state.
 
-## Design Data Fetching (scripts/d2c-fetch.js, two-layer priority)
+## Design Data Fetching (MCP-first, zero-token)
 
-Design data is fetched at Step 1 using a **two-layer priority chain** — the
-Agent first tries zero-config channels, then falls back to the helper script:
+Design data is fetched at Step 1 using a **priority chain** that prioritizes
+zero-config, zero-token channels. The Agent **never** asks the user for a
+Figma Personal Access Token — MCP replaces that entirely.
 
 ```
-Layer 1 — Agent level (within the LLM runtime):
-  ┌─ Figma MCP installed?     → Use MCP tools (figma_getFile, etc.)
-  │                               Zero config, no token needed
-  └─ (checked via MCP tool listing in Step 1)
+Priority 1 — Figma MCP (zero config, zero token)
+─────────────────────────────────────────────────
+  Use tools/list (or attempt to call figma_getFile / figma_getNode /
+  figma_getImage) to check if a Figma MCP is installed. If it responds
+  successfully, use MCP output directly — richer data, no token, no export.
 
-Layer 2 — Script level (Node.js):
-  ├─ Figma URL + --token       → REST API (via scripts/d2c-fetch.js)
-  ├─ .fig file (plugin export) → ZIP + Kiwi decode (via scripts/d2c-fetch.js)
-  ├─ .sketch file              → ZIP + sketch-file (via scripts/d2c-fetch.js)
-  └─ image / screenshot        → base64 thumbnail (via scripts/d2c-fetch.js)
-```
+Priority 2 — MCP setup (one-time, 1 minute)
+─────────────────────────────────────────────
+  If no Figma MCP is detected, guide the user through setup. Most code
+  harnesses support MCP natively — it's just a JSON config entry:
 
-**Layer 1** is handled by the Agent (not a script). In Step 1, before running
-the fetch script, the Agent uses `tools/list` or attempts to call
-`figma_getFile` / `figma_getNode` / `figma_getImage` MCP tools. If they respond
-successfully, use the MCP output directly — it's richer, requires no Token,
-and requires no file export.
+  TRAE IDE / TRAE CLI:
+    Settings → MCP → Add Server, or create .trae/mcp.json:
+    {
+      "mcpServers": {
+        "figma": {
+          "command": "npx",
+          "args": ["-y", "@anthropic/figma-mcp"]
+        }
+      }
+    }
 
-**Layer 2** is `scripts/d2c-fetch.js`:
+  Claude Code:
+    Create or edit ~/.claude/mcp.json:
+    {
+      "mcpServers": {
+        "figma": {
+          "command": "npx",
+          "args": ["-y", "@anthropic/figma-mcp"]
+        }
+      }
+    }
+
+  Cursor / Windsurf:
+    Create or edit .cursor/mcp.json or .windsurf/mcp.json with the same
+    structure as above.
+
+  After setup, restart the code harness. The Agent then retries Priority 1.
+
+Priority 3 — Plugin export (.fig file, no token)
+──────────────────────────────────────────────────
+  If MCP setup is not possible (e.g., restricted environment), suggest the
+  figma-to-json plugin (https://github.com/yagudaev/figma-to-json). User
+  opens the design in Figma Desktop, runs the plugin, exports a .fig file.
+  Then pass the file to d2c-fetch.js (no token needed).
+
+Priority 4 — Screenshot (last resort, multimodal vision)
+──────────────────────────────────────────────────────────
+  No MCP, no plugin → take screenshots of the design. D2C falls back to
+  multimodal vision for type validation and layout analysis. Less detailed
+  but zero setup.
+
+The script `scripts/d2c-fetch.js` handles Priority 3 (.fig/.sketch files) and
+Priority 4 (screenshots):
 
 ```bash
 node <skill-dir>/scripts/d2c-fetch.js <input> [--token <pat>]
@@ -111,12 +147,10 @@ node <skill-dir>/scripts/d2c-fetch.js <input> [--token <pat>]
 | `thumbnail` | Base64 preview for visual analysis |
 | `error` / `meta.warnings` | Failure or soft warning details |
 
-**The figma-to-json plugin** fits at Layer 2: the user opens the design in
-Figma Desktop, runs the plugin, exports a `.fig` file, then passes it to `scripts/d2c-fetch.js`. This path needs no Token and no MCP setup, only the plugin
-install (one-time).
-
-Run the appropriate layer in Step 1, following the priority: MCP > plugin
-export / script > screenshot. **Do not manually call the Figma REST API.**
+**Never ask the user for a Figma Personal Access Token.** MCP replaces it
+entirely. The token-based fallback (`--token`) is only available as an
+undocumented escape hatch for environments where MCP and plugin are both
+unavailable.
 
 ## Website Crawling (scripts/d2c-crawl.js)
 
@@ -386,7 +420,7 @@ order, and what each command will do.
 
 1. Ask user confirmation via AskUserQuestion before any filesystem operation
 2. Wait for user feedback after each step — never auto-advance
-3. Figma Token (REST API only) stays in the current session, never persisted
+3. Figma MCP handles all design data access — no token, no REST API calls
 4. Deployment configs never contain real secrets — only templates
 5. **Init:** confirm each deletion; auto-backup `.d2c/` first; rotate old backups; never delete user-authored code
 6. **Context switch** (new design with existing `.d2c/`): auto-backup old state to `.d2c.bak/` after user confirms

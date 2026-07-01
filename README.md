@@ -52,8 +52,7 @@ The `skills` CLI automatically detects your AI coding tool environment and place
 |-------------|---------|-------|
 | **Node.js** | >= 18 | Required for helper scripts (`d2c-status.js`, `d2c-fetch.js`) |
 | **AI Coding Tool** | Any | Claude Code, Cursor, Windsurf, TRAE IDE / CLI |
-| **Figma Account** | Optional | Only needed if using Figma REST API with a Personal Access Token |
-| **Figma MCP** | Optional | Zero-config Figma access in supported tools |
+| **Figma MCP** | Recommended | Zero-token Figma access — D2C guides you through setup if missing |
 
 ---
 
