@@ -236,7 +236,7 @@ The root `AGENTS.md` serves as the **entry point** — tools that load it will
 see the tech stack, token mandate, and where to find detailed specs. Keep it
 under ~40 lines.
 
-Also save an authoritative copy to `.d2c/AGENTS.md` (for resume/reference
+Also save an authoritative copy to `.d2c/AGENTS_bak.md` (for resume/reference
 during future D2C sessions).
 
 Save tech stack preferences to memory after completion.

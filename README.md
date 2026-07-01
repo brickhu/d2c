@@ -91,7 +91,7 @@ After processing a design, D2C produces these context files in your project:
 | File | What it contains |
 |------|-----------------|
 | `.d2c/DESIGN.md` | Design tokens + behavioral constraints + responsive breakpoints + design URL. Documentation only. |
-| `.d2c/AGENTS.md` | Project context index — tech stack, key decisions, constraints |
+| `.d2c/AGENTS_bak.md` | Authoritative copy for D2C resume/reference | Step 3 (copy) |
 | `.d2c/SPEC.md` | Component tree, API contracts, DB schema, state patterns, testing strategy, a11y/security |
 | `.d2c/ASSETS.md` | Image & animation asset manifest with local paths |
 | `PLAN.md` | Atomic task list (frontend → backend → testing → deploy) |

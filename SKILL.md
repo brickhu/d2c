@@ -198,7 +198,7 @@ Each step has a detailed execution guide in the `guides/` directory.
 |------|------|-----------|-------|
 | **1** | Project Survey & Diagnosis | Diagnostic report (chat) + conflict resolution + `.d2c/STATE.md` | `guides/STEP_1_DIAGNOSIS.md` |
 | **2** | Extract Design Tokens | `.d2c/DESIGN.md` (tokens + constraints + responsive breakpoints — documentation only, no code files) ★ | `guides/STEP_2_TOKENS.md` |
-| **3** | Architecture Alignment | `AGENTS.md` (root) + `.d2c/AGENTS.md` (copy for D2C resume) — lightweight project context index + gap decisions (AI-proposed + user-confirmed) | `guides/STEP_3_ARCHITECTURE.md` |
+| **3** | Architecture Alignment | `AGENTS.md` (root) + `.d2c/AGENTS_bak.md` (copy for D2C resume) — lightweight project context index + gap decisions (AI-proposed + user-confirmed) | `guides/STEP_3_ARCHITECTURE.md` |
 | **4** | Coding Standards & Component Mapping | `.d2c/SPEC.md` (directory structure, component tree, constraints, testing strategy) ★ | `guides/STEP_4_SPEC.md` |
 | **5** | Init, Assets & Plan | Scaffold (if needed) + downloaded assets + `.d2c/ASSETS.md` + `PLAN.md` + **`.d2c/PLAYBOOK.md`** (execution roadmap covering code → test → deploy) | `guides/STEP_5_INIT.md` |
 
@@ -230,7 +230,7 @@ When the user triggers Phase 2:
 | `.d2c/STATE.md` | Workflow progress state machine | Steps 1-5 |
 | `.d2c/DESIGN.md` | Design Tokens + constraints (behavioral rules, responsive breakpoints, component states) + design source URL. **Documentation only — single source of truth for all visual values.** | Step 2 |
 | `AGENTS.md` | **Project context index (root)** — lightweight summary auto-detected by all AI coding tools; references `.d2c/` for details. Includes responsive design strategy for web projects. | Step 3 |
-| `.d2c/AGENTS.md` | Authoritative copy for D2C resume/reference | Step 3 (copy) |
+| `.d2c/AGENTS_bak.md` | Authoritative copy for D2C resume/reference | Step 3 (copy) |
 | `.d2c/SPEC.md` | Component tree, API contracts (schema-level), database schema, state patterns, directory structure, coding constraints + Token Adoption rules + testing strategy + error handling + a11y/security baselines | Step 4 |
 | `.d2c/ASSETS.md` | Image/animation asset manifest with local paths | Step 5 |
 | `PLAN.md` | Atomic development task list (code → test → deploy) | Step 5 |

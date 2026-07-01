@@ -123,4 +123,4 @@ Update `.d2c/STATE.md` to mark each task complete.
 
 **Wait for user decision.** The user can either:
 - **(a)** Proceed to optional code generation by continuing with the PLAN.md tasks, or
-- **(b)** Stop here — the context files (`.d2c/DESIGN.md`, `.d2c/SPEC.md`, `.d2c/AGENTS.md`, `.d2c/PLAN.md`, and derived code files) are complete and ready for any Code Agent to consume.
+- **(b)** Stop here — the context files (`.d2c/DESIGN.md`, `.d2c/SPEC.md`, `.d2c/AGENTS_bak.md`, `.d2c/PLAN.md`, and derived code files) are complete and ready for any Code Agent to consume.

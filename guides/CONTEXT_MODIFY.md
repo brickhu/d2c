@@ -23,7 +23,7 @@ User: /d2c all API responses should use snake_case
        ▼
   1. Intent Analysis
      └─ "The user wants to change API response naming convention"
-       └─ Relevant files: .d2c/SPEC.md (§4b3 API Contracts), .d2c/AGENTS.md (§Constraints)
+       └─ Relevant files: .d2c/SPEC.md (§4b3 API Contracts), .d2c/AGENTS_bak.md (§Constraints)
        └─ Impact scope: backend code generation, API contract documentation
        └─ Derivation from existing context: SPEC already defines camelCase implicitly
        │
@@ -37,7 +37,7 @@ User: /d2c all API responses should use snake_case
            POST /api/auth/login response:  { token, user } → { token, user }
            → Rewrite response schema examples
          
-         📄 .d2c/AGENTS.md (§Constraints)
+         📄 .d2c/AGENTS_bak.md (§Constraints)
            Add: [C-01] All API responses use snake_case keys — User request
          
          📄 .d2c/SPEC.md §4c (Coding Constraints)
