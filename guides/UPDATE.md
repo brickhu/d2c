@@ -22,7 +22,7 @@ icon swaps, new pages). Not automatic — must be explicitly requested.
 | **Step 4 (SPEC)** | Update the component tree — new components get ✅ markers, matching existing components are reused. Directory structure is not regenerated |
 | **Step 5c (Assets)** | Download only new or changed resources. Do not overwrite existing files |
 | **Step 5d (PLAN)** | Append incremental tasks to PLAN.md, labeled **《Design v{number} Increment》** |
-| **Step 5e (PLAYBOOK)** | Append `## Increment: Design v{number}` section to PLAYBOOK.md. Reference unchanged phases with "No changes from v{number}" |
+| **Step 5e (README)** | Append `## Increment: Design v{number}` section to README.md. Reference unchanged phases with "No changes from v{number}" |
 | **Step 6 (Code)** | Start with incremental tasks. Existing coded components are unaffected |
 | **Step 7 (Deploy)** | Unchanged |
 

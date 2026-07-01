@@ -2,7 +2,7 @@
 
 > **Trigger:** `/d2c code`
 > 
-> **Note:** This step is NOT part of the core D2C workflow. Steps 1-5 produce the full AI context. Code generation is triggered explicitly by the user via `/d2c code`. See the execution roadmap in `.d2c/PLAYBOOK.md` for implementation phases and dependencies.
+> **Note:** This step is NOT part of the core D2C workflow. Steps 1-5 produce the full AI context. Code generation is triggered explicitly by the user via `/d2c code`. See the execution roadmap in `README.md` for implementation phases and dependencies.
 
 **Input:** PLAN.md + SPEC.md + AGENTS.md + DESIGN.md + ASSETS.md
 **Output:** Incrementally compilable project code

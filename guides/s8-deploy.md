@@ -2,7 +2,7 @@
 
 > **Trigger:** `/d2c deploy`
 > 
-> **Note:** This step is fully optional. The core D2C workflow ends at Step 5 (or Step 6 if user opted into code generation via `/d2c code`). Deployment configuration is an add-on triggered by `/d2c deploy`. See `.d2c/PLAYBOOK.md` for deployment prerequisites.
+> **Note:** This step is fully optional. The core D2C workflow ends at Step 5 (or Step 6 if user opted into code generation via `/d2c code`). Deployment configuration is an add-on triggered by `/d2c deploy`. See `README.md` for deployment prerequisites.
 
 **Input:** Completed code + AGENTS.md (deployment plan)
 **Output:** Deployable app + `README.md`

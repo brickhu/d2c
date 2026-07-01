@@ -98,7 +98,7 @@ After processing a design, D2C produces these context files in your project:
 | `AGENTS.md` | Project context index (root) — auto-detected by AI coding tools | Post-5-step |
 | `.d2c/AGENTS_bak.md` | D2C resume copy | Post-5-step |
 | `PLAN.md` | Atomic development task list (code → test → deploy) | Post-5-step |
-| `.d2c/PLAYBOOK.md` | Execution roadmap — env vars, phases, handoff guide | Post-5-step |
+| `README.md` | Execution roadmap — env vars, phases, handoff guide | Post-5-step |
 
 **Coverage dimension:** Full-stack — frontend UI, backend API, data models, infrastructure.
 
@@ -134,7 +134,7 @@ All commands are used **inside your AI coding tool's chat** after D2C is install
   ├─ Step 4: ARC.md — architecture & tech stack
   ├─ Step 5: SPEC.md — development spec & constraints
   │
-  └─ Post-5-step: AGENTS.md + PLAN.md + PLAYBOOK.md + ASSETS.md
+  └─ Post-5-step: AGENTS.md + PLAN.md + README.md + ASSETS.md
 ```
 
 ---

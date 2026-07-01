@@ -36,7 +36,7 @@ Step 2: DESIGN.md
   │
   ▼
 Steps 3-5: Normal flow
-  └─ AGENTS.md → SPEC.md → PLAN.md → PLAYBOOK.md
+  └─ AGENTS.md → SPEC.md → PLAN.md → README.md
 ```
 
 ## Prerequisites

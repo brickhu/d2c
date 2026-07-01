@@ -406,7 +406,7 @@ import { colors, radius, spacing } from '@/styles/tokens';
 
 Append a testing strategy section to `.d2c/SPEC.md`. This section is populated
 from decisions made in Step 3 (Gap Q&A) and provides the foundation for
-PLAYBOOK.md test plan and future `/d2c test` execution.
+README.md test plan and future `/d2c test` execution.
 
 ```markdown
 ## Testing Strategy
@@ -577,11 +577,11 @@ Use AskUserQuestion to confirm the SPEC.md output:
 
 ```json
 { "header": "Confirm", "question": "SPEC.md is ready. Phase 1 (Design Analysis & Planning) is complete. Review and confirm?", "options": [
-  { "label": "Confirm & Continue", "description": "Phase 1 Complete — Generate AGENTS.md, PLAN.md, PLAYBOOK.md" },
+  { "label": "Confirm & Continue", "description": "Phase 1 Complete — Generate AGENTS.md, PLAN.md, README.md" },
   { "label": "Modify", "description": "I want to adjust the spec" },
   { "label": "Cancel", "description": "Abort D2C" }
 ]}
 ```
 
 On confirm, update `.d2c/STATE.md` to mark Step 5 complete. Read
-`guides/s6-init.md` to generate AGENTS.md, PLAN.md, ASSETS.md, and PLAYBOOK.md.
+`guides/s6-init.md` to generate AGENTS.md, PLAN.md, ASSETS.md, and README.md.

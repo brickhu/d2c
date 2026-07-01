@@ -2,7 +2,7 @@
 
 **Trigger:** `/d2c <any natural language statement>` when `.d2c/STATE.md` exists
 **Input:** User's natural language change request
-**Output:** Modified context files (SPEC.md / DESIGN.md / AGENTS.md / PLAYBOOK.md)
+**Output:** Modified context files (SPEC.md / DESIGN.md / AGENTS.md / README.md)
 
 ## When This Mode Activates
 
@@ -66,13 +66,13 @@ Use this guide for routing:
 | "Add/change API naming" | `SPEC.md` §4b3 (API Contracts) + `AGENTS.md` |
 | "Add security rule" | `SPEC.md` §4g (Security Baselines) + `AGENTS.md` |
 | "Don't touch X directory" | `AGENTS.md` (Constraints) |
-| "Add external service" | `AGENTS.md` + `PLAYBOOK.md` (External Services) |
-| "Change env var" | `PLAYBOOK.md` (Prerequisites) + `.env.example` |
+| "Add external service" | `AGENTS.md` + `README.md` (External Services) |
+| "Change env var" | `README.md` (Prerequisites) + `.env.example` |
 | "Add a11y rule" | `SPEC.md` §4g (Accessibility) |
 | "Change DB/ORM" | `SPEC.md` §4b5 (DB Schema) + `AGENTS.md` |
 | "Add state pattern" | `SPEC.md` §4b4 (State Patterns) |
 | "Change token value" | `.d2c/DESIGN.md` (regenerate derived files if needed) |
-| "Add testing rule" | `SPEC.md` §4e (Testing Strategy) + `PLAYBOOK.md` |
+| "Add testing rule" | `SPEC.md` §4e (Testing Strategy) + `README.md` |
 | "Reference external doc" | `AGENTS.md` (lift to root for visibility) |
 | "General constraint" | `AGENTS.md` + cross-reference to affected file |
 
@@ -91,7 +91,7 @@ User: /d2c use Sentry for error tracking
        ├── AGENTS.md       → Add to Tech Stack: Error tracking: Sentry
        ├── AGENTS.md       → Add to Key Decisions: Sentry as error monitor
        ├── SPEC.md §4f     → Update error handler: "Log to Sentry"
-       └── PLAYBOOK.md     → Add: Prerequisites → Sentry DSN
+       └── README.md     → Add: Prerequisites: Sentry DSN
 ```
 
 ### Modification Guidelines
@@ -173,7 +173,7 @@ After applying changes, verify:
    tRPC", does SPEC.md still reference REST?
 2. **No orphan sections** — if a section was removed, are all references to it
    updated?
-3. **PLAYBOOK.md aligned** — if SPEC testing strategy changed, does PLAYBOOK
+3. **README.md aligned** — if SPEC testing strategy changed, does README
    testing section match?
 4. **Token source intact** — DESIGN.md was not
    accidentally modified (these are token-only files)

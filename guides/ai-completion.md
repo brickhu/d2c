@@ -39,4 +39,4 @@ own answer. All confirmed decisions are recorded in the generated context files
 for traceability.
 
 This pattern applies to decisions surfaced in Step 4 (Architecture Q&A), Step 5
-(Testing strategy in SPEC), and the post-5-step (Execution plan in PLAYBOOK).
+(Testing strategy in SPEC), and the post-5-step (Execution plan in README).

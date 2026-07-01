@@ -98,7 +98,7 @@ cd my-project
 | `AGENTS.md` | 项目上下文索引（根目录）——AI 编程工具自动检测 | 后处理 |
 | `.d2c/AGENTS_bak.md` | D2C 续跑副本 | 后处理 |
 | `PLAN.md` | 原子化开发任务清单（编码 → 测试 → 部署） | 后处理 |
-| `.d2c/PLAYBOOK.md` | 执行手册——环境变量、实施阶段、分步交接指南 | 后处理 |
+| `README.md` | 执行手册——环境变量、实施阶段、分步交接指南 | 后处理 |
 
 **覆盖维度：** 全栈——前端 UI、后端 API、数据模型、基础设施。
 
@@ -134,7 +134,7 @@ cd my-project
   ├─ 步骤四: ARC.md — 架构 & 技术栈
   ├─ 步骤五: SPEC.md — 开发规格 & 约束
   │
-  └─ 后处理: AGENTS.md + PLAN.md + PLAYBOOK.md + ASSETS.md
+  └─ 后处理: AGENTS.md + PLAN.md + README.md + ASSETS.md
 ```
 
 ---

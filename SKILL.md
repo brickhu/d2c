@@ -1,6 +1,6 @@
 ---
 name: "d2c"
-description: "Design2Context (D2C) — A design-to-AI-context workflow. Converts design files (Figma, image) or live websites into structured, full-stack system context in 5 steps: OVERVIEW.md (project meta), PRD.md (business requirements), DESIGN.md (tokens + components + animation), ARC.md (architecture + tech stack), SPEC.md (development spec + constraints). Then generates AGENTS.md, PLAN.md, ASSETS.md, and PLAYBOOK.md. Input: design link, screenshot, or website URL → Output: context files for AI coding agents. Phase 1 produces documentation only — no code files. Code generation is optional, triggered by user command."
+description: "Design2Context (D2C) — A design-to-AI-context workflow. Converts design files (Figma, image) or live websites into structured, full-stack system context in 5 steps: OVERVIEW.md (project meta), PRD.md (business requirements), DESIGN.md (tokens + components + animation), ARC.md (architecture + tech stack), SPEC.md (development spec + constraints). Then generates AGENTS.md, PLAN.md, ASSETS.md, and README.md. Input: design link, screenshot, or website URL → Output: context files for AI coding agents. Phase 1 produces documentation only — no code files. Code generation is optional, triggered by user command."
 
 run_condition: "
   User provides a design link (Figma, Penpot, etc.), a design screenshot, a
@@ -104,7 +104,7 @@ See `guides/s1-overview.md` for rejection format.
 | `/d2c update [new-design-link]` | **Iterate on the current design.** Resumes from recorded step. See `guides/update.md` |
 | `/d2c sync` | **Push style changes back to Figma.** Requires `.d2c/DESIGN.md` with Figma URL. See `guides/sync.md` |
 | `/d2c code` | **Execute the implementation plan.** See `guides/s7-code.md` |
-| `/d2c test` | **Generate test suites.** Follows testing strategy in PLAYBOOK.md and SPEC.md |
+| `/d2c test` | **Generate test suites.** Follows testing strategy in README.md and SPEC.md |
 | `/d2c deploy` | **Prepare deployment.** See `guides/s8-deploy.md` |
 
 Running `/d2c update` or `/d2c sync` without an existing `.d2c/STATE.md` will
@@ -139,7 +139,7 @@ synthesizes the summary documents. See `guides/s6-init.md`.
 | `.d2c/AGENTS_bak.md` | D2C resume copy | Same as AGENTS.md |
 | `.d2c/ASSETS.md` | Image/animation asset manifest with local paths | DESIGN.md + design data |
 | `PLAN.md` | Atomic development task list (code → test → deploy) | PRD.md + ARC.md + SPEC.md |
-| `.d2c/PLAYBOOK.md` | Execution roadmap — env vars, phases, handoff guide | ARC.md + SPEC.md |
+| `README.md` | Execution roadmap — required env vars, implementation phases, handoff guide | Post-5-step |
 
 ### Phase 2: Optional — Code Generation & Deployment (user-triggered)
 
@@ -162,7 +162,7 @@ synthesizes the summary documents. See `guides/s6-init.md`.
 | `.d2c/AGENTS_bak.md` | Authoritative copy for D2C resume/reference | Post-5-step (copy) |
 | `.d2c/ASSETS.md` | Image/animation asset manifest with local paths | Post-5-step |
 | `PLAN.md` | Atomic development task list (code → test → deploy) | Post-5-step |
-| `.d2c/PLAYBOOK.md` | Execution roadmap — required env vars, implementation phases, handoff guide | Post-5-step |
+| `README.md` | Execution roadmap — required env vars, implementation phases, handoff guide | Post-5-step |
 | `.d2c.bak/` | Backup of previous design's state (on context switch) | Auto |
 | `.d2c.restart.bak*/` | Pre-init backups, rotated | Auto (`/d2c init`) |
 
@@ -204,7 +204,7 @@ detected project type. See `guides/s1-overview.md` for the full detection table.
 8. **Backups:** never delete a `.d2c.bak/` or `.d2c.restart.bak*/` without explicit user confirmation
 9. **Design-project mismatch:** never silently resolve; always present options to the user
 10. **Phase 2:** never start Steps C1-C2 unless the user triggers with `/d2c code`, `/d2c test`, or `/d2c deploy`
-11. **Playbook accuracy:** every env var and prerequisite in PLAYBOOK.md must be verifiable — flag uncertain ones with `[Pending: verify]`
+11. **Playbook accuracy:** every env var and prerequisite in README.md must be verifiable — flag uncertain ones with `[Pending: verify]`
 12. **Existing project supplement:** never overwrite user-authored files; only append or create new context files
 13. **Context modification:** always show diff summary and confirm before writing. Never modify DESIGN.md token values without explicit user confirmation
 
@@ -227,7 +227,7 @@ detected project type. See `guides/s1-overview.md` for the full detection table.
   │   Step 1 → OVERVIEW.md    Step 4 → ARC.md          │
   │   Step 2 → PRD.md         Step 5 → SPEC.md          │
   │   Step 3 → DESIGN.md       ↓                        │
-  │   Post-5-step → AGENTS.md + PLAN.md + PLAYBOOK.md   │
+  │   Post-5-step → AGENTS.md + PLAN.md + README.md   │
   │   Output: Full-stack system context (docs only)      │
   └─────────────────────────────────────────────────────┘
             ▼ (user-triggered)

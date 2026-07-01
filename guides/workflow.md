@@ -18,7 +18,7 @@ see where they are at a glance.
   { "id": "3", "content": "Step 3: Design System → DESIGN.md", "status": "pending", "priority": "high" },
   { "id": "4", "content": "Step 4: Architecture → ARC.md", "status": "pending", "priority": "high" },
   { "id": "5", "content": "Step 5: Development Spec → SPEC.md", "status": "pending", "priority": "high" },
-  { "id": "6", "content": "Generate AGENTS.md + PLAN.md + PLAYBOOK.md", "status": "pending", "priority": "medium" }
+  { "id": "6", "content": "Generate AGENTS.md + PLAN.md + README.md", "status": "pending", "priority": "medium" }
 ]
 ```
 
