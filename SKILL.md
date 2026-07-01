@@ -1,13 +1,14 @@
 ---
 name: "d2c"
-description: "Design2Context (D2C) — A design-to-AI-context workflow. Converts design files (Figma, image) into structured, full-stack system context covering frontend, backend, data, and infrastructure for Code Agents (Claude Code, Cursor, Windsurf, etc.). Produces DESIGN.md (tokens + constraints), AGENTS.md, SPEC.md, PLAN.md, ASSETS.md, and PLAYBOOK.md. Phase 1 produces documentation only — no code files. Code generation is optional, triggered by user command at the end. Input: design link or screenshot → Output: context files for AI coding agents."
+description: "Design2Context (D2C) — A design-to-AI-context workflow. Converts design files (Figma, image) or live websites into structured, full-stack system context covering frontend, backend, data, and infrastructure for Code Agents (Claude Code, Cursor, Windsurf, etc.). Produces DESIGN.md (tokens + constraints), AGENTS.md, SPEC.md, PLAN.md, ASSETS.md, and PLAYBOOK.md. Input: design link, screenshot, or website URL → Output: context files for AI coding agents. Phase 1 produces documentation only — no code files. Code generation is optional, triggered by user command at the end."
 
 run_condition: "
-  User provides a design link (Figma, Penpot, etc.), a design screenshot, or
-  triggers `/d2c init`, `/d2c update`, or `/d2c sync`. Suitable for starting
-  a new project from scratch, introducing D2C into an existing codebase,
-  iterating on an existing design, feeding changes back to the design, or
-  discarding prior progress to start fresh."
+  User provides a design link (Figma, Penpot, etc.), a design screenshot, a
+  website URL, or triggers `/d2c init`, `/d2c update`, or `/d2c sync`.
+  Suitable for starting a new project from scratch, introducing D2C into an
+  existing codebase, iterating on an existing design, feeding changes back to
+  the design, reverse-engineering a live website, or discarding prior progress
+  to start fresh."
 
 author: "fei"
 ---
@@ -116,6 +117,42 @@ install (one-time).
 Run the appropriate layer in Step 1, following the priority: MCP > plugin
 export / script > screenshot. **Do not manually call the Figma REST API.**
 
+## Website Crawling (scripts/d2c-crawl.js)
+
+When the user provides a website URL instead of a design file, D2C **crawls
+the live website** to extract design tokens, DOM structure, and responsive
+information. The crawled data is then fed into Step 2 the same way as
+design file data.
+
+```bash
+# Install Playwright (one-time)
+cd <skill-dir>/scripts && npm install && npx playwright install chromium
+
+# Crawl a website
+node <skill-dir>/scripts/d2c-crawl.js "https://example.com" --output .d2c/crawled.json
+```
+
+The crawler extracts:
+
+| Category | What |
+|----------|------|
+| Colors | Top 20 text + background colors by frequency |
+| Typography | Font families, sizes, weights, line heights |
+| Spacing | Gap, padding, margin values from layout |
+| Radius & Shadows | border-radius and box-shadow in use |
+| DOM Structure | Hierarchical component tree (max depth 8) |
+| Assets | Images (src, alt, dimensions), SVGs, fonts |
+| Screenshots | Desktop (1280×900), Tablet (768×1024), Mobile (375×812) |
+| Breakpoints | CSS media query min-width/max-width |
+
+The output JSON is compatible with the D2C fetch format, so Step 2's
+`STEP_2_TOKENS.md` guide processes it identically.
+
+**Fallback:** If Playwright cannot be installed, the Agent uses
+`integrated_browser` MCP tools to manually crawl and extract the same data.
+
+See `guides/WEBSITE_INPUT.md` for the full protocol.
+
 ## Design Types D2C Understands
 
 D2C accepts visual design files from exactly four design types (validated in Step 1).
@@ -137,8 +174,8 @@ explanation. See `guides/STEP_1_DIAGNOSIS.md` for rejection format.
 
 | Command | What it does |
 |---------|-------------|
-| `/d2c <design-link-or-screenshot-or-file>` | **Smart entry.** Runs the status script, then presents a menu (or auto-selects, or shows a warning confirmation) based on project state |
-| `/d2c <any natural language>` | **Context modification (existing project).** When `.d2c/STATE.md` exists and input is not a design/command, routes to modify existing context files via AI conversation — see `guides/CONTEXT_MODIFY.md` |
+| `/d2c <design-link-or-screenshot-or-file-or-website-url>` | **Smart entry.** Runs the status script, then presents a menu (or auto-selects, or shows a warning confirmation) based on project state. Website URLs trigger the crawling pipeline (see Website Crawling above) |
+| `/d2c <any natural language>` | **Context modification (existing project).** When `.d2c/STATE.md` exists and input is not a design/website/command, routes to modify existing context files via AI conversation — see `guides/CONTEXT_MODIFY.md` |
 | `/d2c init [new-design-link]` | **Force a fresh start.** Backs up existing `.d2c/`, cleans generated context (with user confirmation), and enters Step 1 — see `guides/INIT.md` |
 | `/d2c update [new-design-link]` | **Iterate on the current design.** Resumes from the recorded step, or does an incremental diff if a new link is provided — see `guides/UPDATE.md` |
 | `/d2c sync` | **Push style changes back to Figma.** Requires an existing `.d2c/DESIGN.md` with a Figma URL and write access — see `guides/SYNC.md` |

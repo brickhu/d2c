@@ -1,6 +1,6 @@
 # D2C — Design2Context
 
-> Translate design files into structured full-stack AI development context.
+> Translate design files or live websites into structured full-stack AI development context.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -67,7 +67,8 @@ npx skills add brickhu/d2c
 cd my-project
 
 # 3. Ask your AI coding tool:
-#    /d2c <your-figma-link-or-screenshot>
+#    /d2c <your-figma-link-or-screenshot-or-website-url>
+#    e.g. /d2c https://stripe.com/pricing
 
 # 4. Follow the guided 5-step workflow — D2C generates full-stack context
 #    covering UI → API → Data → Infrastructure
@@ -108,7 +109,7 @@ All commands are used **inside your AI coding tool's chat** after D2C is install
 
 | Command | What it does |
 |---------|-------------|
-| `/d2c <design>` | **Smart entry** — auto-detects project state and routes to init/update/start |
+| `/d2c <design>` | **Smart entry** — auto-detects input type (design, website, command) and routes to crawl/init/update/start |
 | `/d2c <anything>` | **Context modification** — any natural language refines existing context |
 | `/d2c code` | Execute implementation per PLAN.md |
 | `/d2c test` | Generate test suites |
@@ -122,7 +123,7 @@ All commands are used **inside your AI coding tool's chat** after D2C is install
 ## How It Works
 
 ```
-Input: Figma URL / .fig / image / natural language
+Input: Figma URL / .fig / image / website URL / natural language
            │
            ▼
   ┌───────────────────────────────────────────────┐
@@ -242,6 +243,10 @@ Try the **plugin path** instead: open the design in the Figma desktop app, run t
 ```
 
 This bypasses both MCP and REST API — no tokens needed.
+
+### Can I use D2C to reverse-engineer an existing website?
+
+Yes. Pass the website URL directly: `/d2c https://example.com`. D2C crawls the live site, extracts design tokens, colors, typography, spacing, and DOM structure, then generates the same context files as a design file would.
 
 ### Can I use D2C without a Figma design?
 

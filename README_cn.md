@@ -1,6 +1,6 @@
 # D2C — Design2Context
 
-> 将设计文件转换为结构化的全栈 AI 开发上下文。
+> 将设计文件或线上网页转换为结构化的全栈 AI 开发上下文。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -67,7 +67,8 @@ npx skills add brickhu/d2c
 cd my-project
 
 # 3. 在你的 AI 编码工具中输入：
-#    /d2c <你的 Figma 链接或截图>
+#    /d2c <你的 Figma 链接/截图/网页 URL>
+#    例如: /d2c https://stripe.com/pricing
 
 # 4. 按照引导的 5 步工作流操作——D2C 生成全栈上下文
 #    覆盖 UI → API → 数据 → 基础设施
@@ -108,7 +109,7 @@ cd my-project
 
 | 命令 | 作用 |
 |------|------|
-| `/d2c <设计稿>` | **智能入口**——自动检测项目状态并路由到初始化/更新/开始 |
+| `/d2c <设计稿>` | **智能入口**——自动检测输入类型（设计稿、网页、命令）并路由到爬取/初始化/更新/开始 |
 | `/d2c <任何内容>` | **上下文修改**——任何自然语言都能优化已有上下文 |
 | `/d2c code` | 按 PLAN.md 执行代码实现 |
 | `/d2c test` | 生成测试套件 |
@@ -122,7 +123,7 @@ cd my-project
 ## 工作原理
 
 ```
-输入: Figma URL / .fig / 图片 / 自然语言
+输入: Figma URL / .fig / 图片 / 网页 URL / 自然语言
            │
            ▼
   ┌───────────────────────────────────────────────┐
@@ -242,6 +243,10 @@ node --version
 ```
 
 这种方式绕过了 MCP 和 REST API——无需令牌。
+
+### 能用 D2C 逆向解析已有网站吗？
+
+可以。直接传入网页 URL：`/d2c https://example.com`。D2C 会爬取网站，提取设计令牌、颜色、字体、间距和 DOM 结构，生成与设计稿相同的上下文文件。
 
 ### 没有 Figma 设计稿也能用 D2C 吗？
 
